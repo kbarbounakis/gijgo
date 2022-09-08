@@ -368,7 +368,11 @@ gj.documentManager = {
     }
 };
 
-/**  */gj.core = {
+/**
+  * @widget Core
+  * @plugin Base
+  */
+gj.core = {
     messages: {
         'en-us': {
             monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
@@ -384,7 +388,45 @@ gj.documentManager = {
         }
     },
 
-    /**      */    parseDate: function (value, format, locale) {
+    /** 
+     * @method
+     * @example String.1
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.parseDate('02/03/17', 'mm/dd/yy'));
+     * </script>
+     * @example String.2
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.parseDate('2017 2.3', 'yyyy m.d'));
+     * </script>
+     * @example String.dd.mmm.yyyy
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.parseDate('05 Feb 2017', 'dd mmm yyyy'));
+     * </script>
+     * @example String.dd.mmmm.yyyy
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.parseDate('05 February 2017', 'dd mmmm yyyy'));
+     * </script>
+     * @example String.HH:MM
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.parseDate('10:57', 'HH:MM'));
+     * </script>
+     * @example ASP.NET.JSON.Date
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.parseDate("\/Date(349653600000)\/"));
+     * </script>
+     * @example UNIX.Timestamp
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.parseDate(349653600000));
+     * </script>
+     */
+    parseDate: function (value, format, locale) {
         var i, year = 0, month = 0, date = 1, hour = 0, minute = 0, dateParts, formatParts, result;
 
         if (value && typeof value === 'string') {
@@ -431,7 +473,50 @@ gj.documentManager = {
         return result;
     },
 
-    /**      */    formatDate: function (date, format, locale) {
+    /** 
+     * @method
+     * @example Sample.1
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.formatDate(new Date(2017, 1, 3), 'mm/dd/yy'));
+     * </script>
+     * @example Sample.2
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.formatDate(new Date(2017, 1, 3), 'yyyy m.d'));
+     * </script>
+     * @example Sample.dd.mmm.yyyy
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.formatDate(new Date(2017, 1, 3), 'dd mmm yyyy'));
+     * </script>
+     * @example Sample.dd.mmmm.yyyy
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.formatDate(new Date(2017, 1, 3), 'dd mmmm yyyy'));
+     * </script>
+     * @example Sample.5
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.formatDate(new Date(2017, 1, 3, 20, 43, 53), 'hh:MM:ss tt mm/dd/yyyy'));
+     * </script>
+     * @example Sample.6
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.formatDate(new Date(2017, 1, 3, 20, 43, 53), 'hh:MM TT'));
+     * </script>
+     * @example Short.WeekDay
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.formatDate(new Date(2017, 1, 3), 'ddd, mmm dd'));
+     * </script>
+     * @example Full.WeekDay
+     * <div id="date"></div>
+     * <script>
+     *     $('#date').text(gj.core.formatDate(new Date(2017, 1, 3), 'dddd, mmm dd'));
+     * </script>
+     */
+    formatDate: function (date, format, locale) {
         var result = '', separator, tmp,
             formatParts = format.split(/[\s,-\.//\:]+/),
             separators = format.split(/s+|M+|H+|h+|t+|T+|d+|m+|y+/);
@@ -969,4 +1054,3 @@ gj.core.messages['zh-tw'] = {
     cancel: '取消',
     titleFormat: 'yyyy年mmmm'
 };
-

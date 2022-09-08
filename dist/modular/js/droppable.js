@@ -6,12 +6,32 @@
  * Released under the MIT license
  */
 /* global window alert jQuery */
-/**  */gj.droppable = {
+/** 
+ * @widget Droppable 
+ * @plugin Base
+ */
+gj.droppable = {
     plugins: {}
 };
 
 gj.droppable.config = {
-    /** If specified, the class will be added to the droppable while draggable is being hovered over the droppable.     */    hoverClass: undefined
+    /** If specified, the class will be added to the droppable while draggable is being hovered over the droppable.
+     * @type string
+     * @default undefined
+     * @example sample <!-- droppable, draggable -->
+     * <style>
+     * .draggable { border: 1px solid #999; width: 300px; height: 200px; text-align: center; }
+     * .droppable { border: 1px solid #999; width: 300px; height: 200px; text-align: center; }
+     * .hover { background-color: #FF0000; }
+     * </style>
+     * <div id="droppable" class="droppable">Drop Here</div>
+     * <div id="draggable" class="draggable">Drag Me</div>
+     * <script>
+     *     $('#draggable').draggable();
+     *     $('#droppable').droppable({ hoverClass: 'hover' });
+     * </script>
+     */
+    hoverClass: undefined
 };
 
 gj.droppable.methods = {
@@ -96,15 +116,74 @@ gj.droppable.methods = {
 };
 
 gj.droppable.events = {
-    /** Triggered when a draggable element is dropped.     */    drop: function ($dropEl, offsetX, offsetY) {
+    /** Triggered when a draggable element is dropped.
+     * @event drop
+     * @param {object} e - event data
+     * @example sample <!-- droppable, draggable -->
+     * <style>
+     * .draggable { border: 1px solid #999; width: 300px; height: 200px; text-align: center; }
+     * .droppable { border: 1px solid #999; width: 300px; height: 200px; text-align: center; }
+     * .drop { background-color: #FF0000; }
+     * </style>
+     * <div id="droppable" class="droppable">Drop Here</div>
+     * <div id="draggable" class="draggable">Drag Me</div>
+     * <script>
+     *     $('#draggable').draggable();
+     *     $('#droppable').droppable({ drop: function() { $(this).addClass('drop') } });
+     * </script>
+     */
+    drop: function ($dropEl, offsetX, offsetY) {
         $dropEl.trigger('drop', [{ top: offsetY, left: offsetX }]);
     },
 
-    /** Triggered when a draggable element is dragged over the droppable.     */    over: function ($dropEl, mousePosition) {
+    /** Triggered when a draggable element is dragged over the droppable.
+     * @event over
+     * @param {object} e - event data
+     * @param {object} mousePosition - Current mouse position as { top, left } object.
+     * @example sample <!-- droppable, draggable -->
+     * <style>
+     * .draggable { border: 1px solid #999; width: 300px; height: 200px; text-align: center; }
+     * .droppable { border: 1px solid #999; width: 300px; height: 200px; text-align: center; }
+     * .hover { background-color: #FF0000; }
+     * </style>
+     * <div id="droppable" class="droppable">Drop Here</div>
+     * <div id="draggable" class="draggable">Drag Me</div>
+     * <script>
+     *     $('#draggable').draggable();
+     *     $('#droppable').droppable({
+     *         over: function() { 
+     *             $(this).addClass('hover')
+     *         },
+     *         out: function() {
+     *             $(this).removeClass('hover')
+     *         }
+     *     });
+     * </script>
+     */
+    over: function ($dropEl, mousePosition) {
         $dropEl.trigger('over', [mousePosition]);
     },
 
-    /** Triggered when a draggable element is dragged out of the droppable.     */    out: function ($dropEl) {
+    /** Triggered when a draggable element is dragged out of the droppable.
+     * @event out
+     * @param {object} e - event data
+     * @example sample <!-- droppable, draggable -->
+     * <style>
+     * .draggable { border: 1px solid #999; width: 300px; height: 200px; text-align: center; }
+     * .droppable { border: 1px solid #999; width: 300px; height: 200px; text-align: center; }
+     * .hover { background-color: #FF0000; }
+     * </style>
+     * <div id="droppable" class="droppable">Drop Here</div>
+     * <div id="draggable" class="draggable">Drag Me</div>
+     * <script>
+     *     $('#draggable').draggable();
+     *     $('#droppable').droppable({
+     *         over: function() { $(this).addClass('hover') },
+     *         out: function() { $(this).removeClass('hover') }
+     *     });
+     * </script>
+     */
+    out: function ($dropEl) {
         $dropEl.trigger('out');
     }
 };
@@ -116,7 +195,32 @@ gj.droppable.widget = function ($element, jsConfig) {
     self.isOver = false;
     self.isDragging = false;
 
-    /** Removes the droppable functionality.     */    self.destroy = function () {
+    /** Removes the droppable functionality.
+     * @method
+     * @return jquery element
+     * @example sample <!-- draggable, droppable -->
+     * <button onclick="create()" class="gj-button-md">Create</button>
+     * <button onclick="dropEl.destroy()" class="gj-button-md">Destroy</button>
+     * <br/><br/>
+     * <style>
+     * .draggable { border: 1px solid #999; width: 300px; height: 200px; text-align: center; }
+     * .droppable { border: 1px solid #999; width: 300px; height: 200px; text-align: center; }
+     * .hover { background-color: #FF0000; }
+     * </style>
+     * <div id="droppable" class="droppable">Drop Here</div>
+     * <div id="draggable" class="draggable">Drag Me</div>
+     * <script>
+     *     var dropEl;
+     *     $('#draggable').draggable();
+     *     function create() {
+     *         dropEl = $('#droppable').droppable({
+     *             hoverClass: 'hover'
+     *         });
+     *     }
+     *     create();
+     * </script>
+     */
+    self.destroy = function () {
         return methods.destroy(this);
     }
 

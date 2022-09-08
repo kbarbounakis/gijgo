@@ -338,7 +338,7 @@
     // Default task(s).
     grunt.registerTask('default', ['copy', 'extractExamples', 'concat', 'clean', 'replace', 'uglify', 'cssmin', 'watch']);
 
-    grunt.registerTask('build', ['copy', 'concat', 'clean', 'replace', 'uglify', 'cssmin']);
+    grunt.registerTask('build', ['copy', 'concat', 'clean', 'uglify', 'cssmin']);
 };
 
 

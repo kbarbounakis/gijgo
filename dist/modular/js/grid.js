@@ -6,68 +6,739 @@
  * Released under the MIT license
  */
 /* global window alert jQuery gj */
-/**  */gj.grid = {
+/**
+  * @widget Grid
+  * @plugin Base
+  */
+gj.grid = {
     plugins: {},
     messages: {}
 };
 
 gj.grid.config = {
     base: {
-        /** The data source for the grid.         */        dataSource: undefined,
+        /** The data source for the grid.
+         * @additionalinfo If set to string, then the grid is going to use this string as a url for ajax requests to the server.<br />
+         * If set to object, then the grid is going to use this object as settings for the <a href="http://api.jquery.com/jquery.ajax/" target="_new">jquery ajax</a> function.<br />
+         * If set to array, then the grid is going to use the array as data for rows.
+         * @type (string|object|array)
+         * @default undefined
+         * @example Remote.JS.Configuration <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         columns: [ { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         * @example Remote.Html.Configuration <!-- grid -->
+         * <table id="grid" data-source="/Players/Get">
+         *     <thead>
+         *         <tr>
+         *             <th width="56" data-field="ID">#</th>
+         *             <th>Name</th>
+         *             <th>PlaceOfBirth</th>
+         *         </tr>
+         *     </thead>
+         * </table>
+         * <script>
+         *     $('#grid').grid();
+         * </script>
+         * @example Local.DataSource <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var data = [
+         *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+         *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+         *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+         *     ];
+         *     $('#grid').grid({
+         *         dataSource: data,
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         * @example Html.DataSource <!-- grid, dropdown -->
+         * <table id="grid">
+         *     <thead>
+         *         <tr>
+         *             <th width="56" data-field="ID">#</th>
+         *             <th data-sortable="true">Name</th>
+         *             <th data-field="PlaceOfBirth" data-sortable="true">Place Of Birth</th>
+         *         </tr>
+         *     </thead>
+         *     <tbody>
+         *         <tr>
+         *             <td>1</td>
+         *             <td>Hristo Stoichkov</td>
+         *             <td>Plovdiv, Bulgaria</td>
+         *         </tr>
+         *         <tr>
+         *             <td>2</td>
+         *             <td>Ronaldo Luis Nazario de Lima</td>
+         *             <td>Rio de Janeiro, Brazil</td>
+         *         </tr>
+         *         <tr>
+         *             <td>3</td>
+         *             <td>David Platt</td>
+         *             <td>Chadderton, Lancashire, England</td>
+         *         </tr>
+         *     </tbody>
+         * </table>
+         * <script>
+         *     $('#grid').grid({ pager: { limit: 2, sizes: [2, 5, 10, 20] }});
+         * </script>
+         * @example Remote.Custom.Render <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var grid, onSuccessFunc = function (response) {
+         *         alert('The result contains ' + response.records.length + ' records.');
+         *         grid.render(response);
+         *     };
+         *     grid = $('#grid').grid({
+         *         dataSource: { url: '/Players/Get', data: {}, success: onSuccessFunc },
+         *         columns: [ { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         * @example Remote.Custom.Error <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var grid, onErrorFunc = function (response) {
+         *         alert('Server error.');
+         *     };
+         *     grid = $('#grid').grid({
+         *         dataSource: { url: '/DataSources/InvalidUrl', error: onErrorFunc },
+         *         columns: [ { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         */
+        dataSource: undefined,
 
-        /** An array that holds the configurations of each column from the grid.         */        columns: [],
+        /** An array that holds the configurations of each column from the grid.
+         * @type array
+         * @example JS.Configuration <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth', name: 'Birth Place' } ]
+         *     });
+         * </script>
+         */
+        columns: [],
 
-        /** Auto generate column for each field in the datasource when set to true.         */        autoGenerateColumns: false,
+        /** Auto generate column for each field in the datasource when set to true.
+         * @type array
+         * @example sample <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         autoGenerateColumns: true
+         *     });
+         * </script>
+         */
+        autoGenerateColumns: false,
 
-        /** An object that holds the default configuration settings of each column from the grid.         */        defaultColumnSettings: {
+        /** An object that holds the default configuration settings of each column from the grid.
+         * @type object
+         * @example sample <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         defaultColumnSettings: { align: 'right' },
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth', name: 'Birth Place' } ]
+         *     });
+         * </script>
+         */
+        defaultColumnSettings: {
 
-            /** If set to true the column will not be displayed in the grid. By default all columns are displayed.             */            hidden: false,
+            /** If set to true the column will not be displayed in the grid. By default all columns are displayed.
+             * @alias column.hidden
+             * @type boolean
+             * @default false
+             * @example sample <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *            { field: 'ID', width: 56 },
+             *            { field: 'Name' },
+             *            { field: 'PlaceOfBirth', hidden: true }
+             *        ]
+             *     });
+             * </script>
+             */
+            hidden: false,
 
             /** The width of the column. Numeric values are treated as pixels.
-             * If the width is undefined the width of the column is not set and depends on the with of the table(grid).             */            width: undefined,
+             * If the width is undefined the width of the column is not set and depends on the with of the table(grid).
+             * @alias column.width
+             * @type number|string
+             * @default undefined
+             * @example sample <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', width: 120 },
+             *             { field: 'PlaceOfBirth' }
+             *         ]
+             *     });
+             * </script>
+             */
+            width: undefined,
 
             /** Indicates if the column is sortable.
-             * If set to true the user can click the column header and sort the grid by the column source field.             */            sortable: false,
+             * If set to true the user can click the column header and sort the grid by the column source field.
+             * @alias column.sortable
+             * @type boolean|object
+             * @default false
+             * @example Remote <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', sortable: true },
+             *             { field: 'PlaceOfBirth', sortable: false }
+             *         ]
+             *     });
+             * </script>
+             * @example Local.Custom <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     var data = [
+             *         { 'ID': 1, 'Value1': 'Foo', 'Value2': 'Foo' },
+             *         { 'ID': 2, 'Value1': 'bar', 'Value2': 'bar' },
+             *         { 'ID': 3, 'Value1': 'moo', 'Value2': 'moo' },
+             *         { 'ID': 4, 'Value1': null, 'Value2': undefined }
+             *     ];
+             *     var caseSensitiveSort = function (direction, column) { 
+             *         return function (recordA, recordB) {
+             *             var a = recordA[column.field] || '',
+             *                 b = recordB[column.field] || '';
+             *             return (direction === 'asc') ? a < b : b < a;
+             *         };
+             *     };
+             *     $('#grid').grid({
+             *         dataSource: data,
+             *         columns: [
+             *             { field: 'ID' },
+             *             { field: 'Value1', sortable: true },
+             *             { field: 'Value2', sortable: { sorter: caseSensitiveSort } }
+             *         ]
+             *     });
+             * </script>
+             * @example Remote.Bootstrap.3 <!-- bootstrap, grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         uiLibrary: 'bootstrap',
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 34 },
+             *             { field: 'Name', sortable: true },
+             *             { field: 'PlaceOfBirth', sortable: false }
+             *         ]
+             *     });
+             * </script>
+             * @example Remote.Bootstrap.4.Material.Icons <!-- bootstrap4, grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         uiLibrary: 'bootstrap4',
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', sortable: true },
+             *             { field: 'PlaceOfBirth', sortable: false }
+             *         ]
+             *     });
+             * </script>
+             * @example Remote.Bootstrap.4.FontAwesome <!-- bootstrap4, fontawesome, grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         uiLibrary: 'bootstrap4',
+             *         iconsLibrary: 'fontawesome',
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 42 },
+             *             { field: 'Name', sortable: true },
+             *             { field: 'PlaceOfBirth', sortable: false }
+             *         ]
+             *     });
+             * </script>
+             */
+            sortable: false,
 
-            /** Indicates the type of the column.             */            type: 'text',
+            /** Indicates the type of the column.
+             * @alias column.type
+             * @type text|checkbox|icon|date|time|datetime
+             * @default 'text'
+             * @example Bootstrap.3.Icon <!-- grid, bootstrap -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap',
+             *         columns: [
+             *             { field: 'ID', width: 34 },
+             *             { field: 'Name', title: 'Player' },
+             *             { field: 'PlaceOfBirth', title: 'Place of Birth' },
+             *             {
+             *               title: '', field: 'Info', width: 32, type: 'icon', icon: 'glyphicon-info-sign',
+             *               events: {
+             *                 'click': function (e) {
+             *                     alert('record with id=' + e.data.id + ' is clicked.');
+             *                 }
+             *               }
+             *             }
+             *         ]
+             *     });
+             * </script>
+             * @example Bootstrap.4.Icon <!-- grid, bootstrap4, fontawesome -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap4',
+             *         columns: [
+             *             { field: 'ID', width: 42 },
+             *             { field: 'Name', title: 'Player' },
+             *             { field: 'PlaceOfBirth', title: 'Place of Birth' },
+             *             {
+             *               title: '', field: 'Info', width: 42, type: 'icon', icon: 'fa fa-pencil',
+             *               events: {
+             *                 'click': function (e) {
+             *                     alert('record with id=' + e.data.id + ' is clicked.');
+             *                 }
+             *               }
+             *             }
+             *         ]
+             *     });
+             * </script>
+             * @example Bootstrap.3.Checkbox <!-- grid, checkbox, bootstrap -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap',
+             *         columns: [
+             *             { field: 'ID', width: 34 },
+             *             { field: 'Name', title: 'Player' },
+             *             { field: 'PlaceOfBirth', title: 'Place of Birth' },
+             *             { title: 'Active?', field: 'IsActive', width: 80, type: 'checkbox', align: 'center' }
+             *         ]
+             *     });
+             * </script>
+             * @example Bootstrap.4.Checkbox <!-- grid, checkbox, bootstrap4 -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap4',
+             *         columns: [
+             *             { field: 'ID', width: 46 },
+             *             { field: 'Name', title: 'Player' },
+             *             { field: 'PlaceOfBirth', title: 'Place of Birth' },
+             *             { title: 'Active?', field: 'IsActive', width: 80, type: 'checkbox', align: 'center' }
+             *         ]
+             *     });
+             * </script>
+             */
+            type: 'text',
 
-            /** The caption that is going to be displayed in the header of the grid.             */            title: undefined,
+            /** The caption that is going to be displayed in the header of the grid.
+             * @alias column.title
+             * @type string
+             * @default undefined
+             * @example sample <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', title: 'Player' },
+             *             { field: 'PlaceOfBirth', title: 'Place of Birth' }
+             *         ]
+             *     });
+             * </script>
+             */
+            title: undefined,
 
             /** The field name to which the column is bound.
-             * If the column.title is not defined this value is used as column.title.             */            field: undefined,
+             * If the column.title is not defined this value is used as column.title.
+             * @alias column.field
+             * @type string
+             * @default undefined
+             * @example sample <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name' },
+             *             { field: 'PlaceOfBirth', title: 'Place of Birth' }
+             *         ]
+             *     });
+             * </script>
+             */
+            field: undefined,
 
-            /** This setting control the alignment of the text in the cell.             */            align: undefined,
+            /** This setting control the alignment of the text in the cell.
+             * @alias column.align
+             * @type left|right|center|justify|initial|inherit
+             * @default undefined
+             * @example Material.Design <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 100, align: 'center' },
+             *             { field: 'Name', align: 'right' },
+             *             { field: 'PlaceOfBirth', align: 'left' }
+             *         ]
+             *     });
+             * </script>
+             * @example Bootstrap.4 <!-- grid, bootstrap4 -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap4',
+             *         columns: [
+             *             { field: 'ID', width: 56, align: 'center' },
+             *             { field: 'Name', align: 'right' },
+             *             { field: 'PlaceOfBirth', align: 'left' }
+             *         ]
+             *     });
+             * </script>
+             */
+            align: undefined,
 
-            /** The name(s) of css class(es) that are going to be applied to all cells inside that column, except the header cell.             */            cssClass: undefined,
+            /** The name(s) of css class(es) that are going to be applied to all cells inside that column, except the header cell.
+             * @alias column.cssClass
+             * @type string
+             * @default undefined
+             * @example sample <!-- grid -->
+             * <table id="grid"></table>
+             * <style>
+             * .nowrap { white-space: nowrap }
+             * .bold { font-weight: bold }
+             * </style>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', width: 100, cssClass: 'nowrap bold' },
+             *             { field: 'PlaceOfBirth' }
+             *         ]
+             *     });
+             * </script>
+             */
+            cssClass: undefined,
 
-            /** The name(s) of css class(es) that are going to be applied to the header cell of that column.             */            headerCssClass: undefined,
+            /** The name(s) of css class(es) that are going to be applied to the header cell of that column.
+             * @alias column.headerCssClass
+             * @type string
+             * @default undefined
+             * @example sample <!-- grid -->
+             * <table id="grid"></table>
+             * <style>
+             * .italic { font-style: italic }
+             * </style>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', headerCssClass: 'italic' },
+             *             { field: 'PlaceOfBirth' }
+             *         ]
+             *     });
+             * </script>
+             */
+            headerCssClass: undefined,
 
-            /** The text for the cell tooltip.             */            tooltip: undefined,
+            /** The text for the cell tooltip.
+             * @alias column.tooltip
+             * @type string
+             * @default undefined
+             * @example sample <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56, tooltip: 'This is my tooltip 1.' },
+             *             { field: 'Name', tooltip: 'This is my tooltip 2.' },
+             *             { field: 'PlaceOfBirth', tooltip: 'This is my tooltip 3.' }
+             *         ]
+             *     });
+             * </script>
+             */
+            tooltip: undefined,
 
             /** Css class for icon that is going to be in use for the cell.
-             * This setting can be in use only with combination of type icon.             */            icon: undefined,
+             * This setting can be in use only with combination of type icon.
+             * @alias column.icon
+             * @type string
+             * @default undefined
+             * @example sample <!-- bootstrap, grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap',
+             *         columns: [
+             *             { field: 'ID', width: 34 },
+             *             { field: 'Name' },
+             *             { field: 'PlaceOfBirth' },
+             *             { title: '', field: 'Edit', width: 32, type: 'icon', icon: 'glyphicon-pencil', events: { 'click': function (e) { alert('name=' + e.data.record.Name); } } }
+             *         ]
+             *     });
+             * </script>
+             */
+            icon: undefined,
 
             /** Configuration object with event names as keys and functions as values that are going to be bind to each cell from the column.
-             * Each function is going to receive event information as a parameter with info in the 'data' field for id, field name and record data.             */            events: undefined,
+             * Each function is going to receive event information as a parameter with info in the 'data' field for id, field name and record data.
+             * @alias column.events
+             * @type object
+             * @default undefined
+             * @example javascript.configuration <!-- bootstrap, grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap',
+             *         columns: [
+             *             { field: 'ID', width: 34 },
+             *             {
+             *               field: 'Name',
+             *               events: {
+             *                 'mouseenter': function (e) {
+             *                     e.stopPropagation();
+             *                     $(e.currentTarget).css('background-color', 'red');
+             *                 },
+             *                 'mouseleave': function (e) {
+             *                     e.stopPropagation();
+             *                     $(e.currentTarget).css('background-color', '');
+             *                 }
+             *               }
+             *             },
+             *             { field: 'PlaceOfBirth' },
+             *             {
+             *               title: '', field: 'Info', width: 34, type: 'icon', icon: 'glyphicon-info-sign',
+             *               events: {
+             *                 'click': function (e) {
+             *                     alert('record with id=' + e.data.id + ' is clicked.'); }
+             *                 }
+             *             }
+             *         ]
+             *     });
+             * </script>
+             * @example html.configuration <!-- bootstrap, grid -->
+             * <table id="grid" data-source="/Players/Get" data-ui-library="bootstrap">
+             *     <thead>
+             *         <tr>
+             *             <th data-field="ID" width="34">ID</th>
+             *             <th data-events="mouseenter: onMouseEnter, mouseleave: onMouseLeave">Name</th>
+             *             <th data-field="PlaceOfBirth">Place Of Birth</th>
+             *             <th data-events="click: onClick" data-type="icon" data-icon="glyphicon-info-sign" width="32"></th>
+             *         </tr>
+             *     </thead>
+             * </table>
+             * <script>
+             *     function onMouseEnter (e) {
+             *         $(e.currentTarget).css('background-color', 'red');
+             *     }
+             *     function onMouseLeave (e) {
+             *         $(e.currentTarget).css('background-color', '');
+             *     }
+             *     function onClick(e) {
+             *         alert('record with id=' + e.data.id + ' is clicked.');
+             *     }
+             *     $('#grid').grid();
+             * </script>
+             */
+            events: undefined,
 
-            /** Format the date when the type of the column is date.             */            format: 'mm/dd/yyyy',
+            /** Format the date when the type of the column is date.
+             * @additionalinfo <b>d</b> - Day of the month as digits; no leading zero for single-digit days.<br/>
+             * <b>dd</b> - Day of the month as digits; leading zero for single-digit days.<br/>
+             * <b>m</b> - Month as digits; no leading zero for single-digit months.<br/>
+             * <b>mm</b> - Month as digits; leading zero for single-digit months.<br/>
+             * <b>yy</b> - Year as last two digits; leading zero for years less than 10.<br/>
+             * <b>yyyy</b> - Year represented by four digits.<br/>
+             * <b>s</b> - Seconds; no leading zero for single-digit seconds.<br/>
+             * <b>ss</b> - Seconds; leading zero for single-digit seconds.<br/>
+             * <b>M</b> - Minutes; no leading zero for single-digit minutes. Uppercase MM to avoid conflict with months.<br/>
+             * <b>MM</b> - Minutes; leading zero for single-digit minutes. Uppercase MM to avoid conflict with months.<br/>
+             * <b>H</b> - Hours; no leading zero for single-digit hours (24-hour clock).<br/>
+             * <b>HH</b> - Hours; leading zero for single-digit hours (24-hour clock).<br/>
+             * <b>h</b> - Hours; no leading zero for single-digit hours (12-hour clock).<br/>
+             * <b>hh</b> - Hours; leading zero for single-digit hours (12-hour clock).<br/>
+             * <b>tt</b> - Lowercase, two-character time marker string: am or pm.<br/>
+             * <b>TT</b> - Uppercase, two-character time marker string: AM or PM.<br/>
+             * @alias column.format
+             * @type string
+             * @default 'mm/dd/yyyy'
+             * @example sample <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name' },
+             *             { field: 'DateOfBirth', title: 'Date 1', type: 'date', format: 'HH:MM:ss mm/dd/yyyy' },
+             *             { field: 'DateOfBirth', title: 'Date 2', type: 'date' }
+             *         ]
+             *     });
+             * </script>
+             */
+            format: 'mm/dd/yyyy',
 
-            /** Number of decimal digits after the decimal point.             */            decimalDigits: undefined,
+            /** Number of decimal digits after the decimal point.
+             * @alias column.decimalDigits
+             * @type number
+             * @default undefined
+             */
+            decimalDigits: undefined,
 
             /** Template for the content in the column.
-             * Use curly brackets '{}' to wrap the names of data source columns from server response.             */            tmpl: undefined,
+             * Use curly brackets '{}' to wrap the names of data source columns from server response.
+             * @alias column.tmpl
+             * @type string
+             * @default undefined
+             * @example sample <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name' },
+             *             { title: 'Info', tmpl: '{Name} is born in {PlaceOfBirth}.' }
+             *         ]
+             *     });
+             * </script>
+             */
+            tmpl: undefined,
 
-            /** If set to true stop event propagation when event occur.             */            stopPropagation: false,
+            /** If set to true stop event propagation when event occur.
+             * @alias column.stopPropagation
+             * @type boolean
+             * @default false
+             * @example sample <!-- bootstrap, grid -->
+             * <table id="grid" data-source="/Players/Get"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         uiLibrary: 'bootstrap',
+             *         columns: [
+             *             { field: 'ID', width: 34 },
+             *             { field: 'Name', events: { 'click': function (e) { alert('name=' + e.data.record.Name); } }  },
+             *             { field: 'PlaceOfBirth', stopPropagation: true, events: { 'click': function (e) { alert('name=' + e.data.record.Name); } }   },
+             *             { title: '', field: 'Edit', width: 32, type: 'icon', icon: 'glyphicon-pencil', events: { 'click': function (e) { alert('name=' + e.data.record.Name); } } }
+             *         ]
+             *     });
+             * </script>
+             */
+            stopPropagation: false,
 
-            /** A renderer is an 'interceptor' function which can be used to transform data (value, appearance, etc.) before it is rendered.             */            renderer: undefined,
+            /** A renderer is an 'interceptor' function which can be used to transform data (value, appearance, etc.) before it is rendered.
+             * @additionalinfo If the renderer function return a value, then this value is going to be automatically set as value of the cell.<br/>
+             * If the renderer function doesn't return a value, then you have to set the content of the cell manually.
+             * @alias column.renderer
+             * @type function
+             * @default undefined
+             * @param {string} value - the record field value
+             * @param {object} record - the data of the row record
+             * @param {object} $cell - the current table cell presented as jquery object
+             * @param {object} $displayEl - inner div element for display of the cell value presented as jquery object
+             * @param {string} id - the id of the record
+             * @example sample <!-- grid -->
+             * <table id="grid" data-source="/Players/Get"></table>
+             * <script>
+             *     var nameRenderer = function (value, record, $cell, $displayEl) { 
+             *         $cell.css('font-style', 'italic'); 
+             *         $displayEl.css('background-color', '#EEE');
+             *         $displayEl.text(value);
+             *     };
+             *     $('#grid').grid({
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', renderer: nameRenderer },
+             *             { field: 'PlaceOfBirth', renderer: function (value, record) { return record.ID % 2 ? '<b>' + value + '</b>' : '<i>' + value + '</i>'; }  }
+             *         ]
+             *     });
+             * </script>
+             */
+            renderer: undefined,
 
-            /** Function which can be used to customize filtering with local data (javascript sourced data).             */            filter: undefined
+            /** Function which can be used to customize filtering with local data (javascript sourced data).
+             * @additionalinfo The default filtering is not case sensitive. The filtering with remote data sources needs to be handled on the server.
+             * @alias column.filter
+             * @type function
+             * @default undefined
+             * @param {string} value - the record field value
+             * @param {string} searchStr - the search string
+             * @example example <!-- grid -->
+             * <input type="text" id="txtValue1" placeholder="Value 1" /> &nbsp;
+             * <input type="text" id="txtValue2" placeholder="Value 2" /> &nbsp;
+             * <button id="btnSearch">Search</button> <br/><br/>
+             * <table id="grid"></table>
+             * <script>
+             *     var grid, data = [
+             *             { 'ID': 1, 'Value1': 'Foo', 'Value2': 'Foo' },
+             *             { 'ID': 2, 'Value1': 'bar', 'Value2': 'bar' },
+             *             { 'ID': 3, 'Value1': 'moo', 'Value2': 'moo' },
+             *             { 'ID': 4, 'Value1': null, 'Value2': undefined }
+             *         ],
+             *         caseSensitiveFilter = function (value, searchStr) { 
+             *             return value.indexOf(searchStr) > -1;
+             *         };
+             *     grid = $('#grid').grid({
+             *         dataSource: data,
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Value1' },
+             *             { field: 'Value2', filter: caseSensitiveFilter }
+             *         ]
+             *     });
+             *     $('#btnSearch').on('click', function () {
+             *         grid.reload({ Value1: $('#txtValue1').val(), Value2: $('#txtValue2').val() });
+             *     });
+             * </script>
+             */
+            filter: undefined
         },
 
         mapping: {
-            /** The name of the object in the server response, that contains array with records, that needs to be display in the grid.             */            dataField: 'records',
+            /** The name of the object in the server response, that contains array with records, that needs to be display in the grid.
+             * @alias mapping.dataField
+             * @type string
+             * @default "records"
+             */
+            dataField: 'records',
 
-            /** The name of the object in the server response, that contains the number of all records on the server.             */            totalRecordsField: 'total'
+            /** The name of the object in the server response, that contains the number of all records on the server.
+             * @alias mapping.totalRecordsField
+             * @type string
+             * @default "total"
+             */
+            totalRecordsField: 'total'
         },
 
         params: {},
@@ -75,40 +746,403 @@ gj.grid.config = {
         paramNames: {
 
             /** The name of the parameter that is going to send the name of the column for sorting.
-             * The "sortable" setting for at least one column should be enabled in order this parameter to be in use.             */            sortBy: 'sortBy',
+             * The "sortable" setting for at least one column should be enabled in order this parameter to be in use.
+             * @alias paramNames.sortBy
+             * @type string
+             * @default "sortBy"
+             */
+            sortBy: 'sortBy',
 
             /** The name of the parameter that is going to send the direction for sorting.
-             * The "sortable" setting for at least one column should be enabled in order this parameter to be in use.             */            direction: 'direction'
+             * The "sortable" setting for at least one column should be enabled in order this parameter to be in use.
+             * @alias paramNames.direction
+             * @type string
+             * @default "direction"
+             */
+            direction: 'direction'
         },
 
-        /** The name of the UI library that is going to be in use. Currently we support Bootstrap 3, Bootstrap 4 and Material Design.         */        uiLibrary: 'materialdesign',
+        /** The name of the UI library that is going to be in use. Currently we support Bootstrap 3, Bootstrap 4 and Material Design.
+         * @additionalinfo The css files for Bootstrap or Material Design should be manually included to the page where the grid is in use.
+         * @type (materialdesign|bootstrap|bootstrap4)
+         * @default 'materialdesign'
+         * @example Material.Design.With.Icons <!-- dropdown, grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ],
+         *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+         *     });
+         * </script>
+         * @example Material.Design.Without.Icons <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         uiLibrary: 'materialdesign',
+         *         iconsLibrary: '',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ],
+         *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+         *     });
+         * </script>
+         * @example Bootstrap.3 <!-- grid, dropdown, bootstrap -->
+         * <div class="container"><table id="grid"></table></div>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         uiLibrary: 'bootstrap',
+         *         columns: [
+         *             { field: 'ID' },
+         *             { field: 'Name', sortable: true },
+         *             { field: 'PlaceOfBirth' }
+         *         ],
+         *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+         *     });
+         * </script>
+         * @example Bootstrap.4.Font.Awesome <!-- bootstrap4, fontawesome, dropdown, grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         uiLibrary: 'bootstrap4',
+         *         iconsLibrary: 'fontawesome',
+         *         columns: [ { field: 'ID', width: 38 }, { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ],
+         *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+         *     });
+         * </script>
+         */
+        uiLibrary: 'materialdesign',
 
-        /** The name of the icons library that is going to be in use. Currently we support Material Icons, Font Awesome and Glyphicons.         */        iconsLibrary: 'materialicons',
+        /** The name of the icons library that is going to be in use. Currently we support Material Icons, Font Awesome and Glyphicons.
+         * @additionalinfo If you use Bootstrap 3 as uiLibrary, then the iconsLibrary is set to Glyphicons by default.<br/>
+         * If you use Material Design as uiLibrary, then the iconsLibrary is set to Material Icons by default.<br/>
+         * The css files for Material Icons, Font Awesome or Glyphicons should be manually included to the page where the grid is in use.
+         * @type (materialicons|fontawesome|glyphicons)
+         * @default 'materialicons'
+         * @example Font.Awesome <!-- fontawesome, grid, dropdown -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         iconsLibrary: 'fontawesome',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ],
+         *         pager: { limit: 5 }
+         *     });
+         * </script>
+         */
+        iconsLibrary: 'materialicons',
 
         /** The type of the row selection.<br/>
-         * If the type is set to multiple the user will be able to select more then one row from the grid.         */        selectionType: 'single',
+         * If the type is set to multiple the user will be able to select more then one row from the grid.
+         * @type (single|multiple)
+         * @default 'single'
+         * @example Multiple.Material.Design.Checkbox <!-- checkbox, grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         selectionType: 'multiple',
+         *         selectionMethod: 'checkbox',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         * @example Multiple.Bootstrap.3.Checkbox <!-- bootstrap, checkbox, grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         primaryKey: 'ID',
+         *         uiLibrary: 'bootstrap',
+         *         dataSource: '/Players/Get',
+         *         selectionType: 'multiple',
+         *         selectionMethod: 'checkbox',
+         *         columns: [ { field: 'ID', width: 32 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         * @example Multiple.Bootstrap.4.Checkbox <!-- bootstrap4, checkbox, grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         uiLibrary: 'bootstrap4',
+         *         dataSource: '/Players/Get',
+         *         selectionType: 'multiple',
+         *         selectionMethod: 'checkbox',
+         *         columns: [ { field: 'ID', width: 42 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         * @example Single.Checkbox <!-- checkbox, grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         selectionType: 'single',
+         *         selectionMethod: 'checkbox',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         */
+        selectionType: 'single',
 
-        /** The type of the row selection mechanism.         */        selectionMethod: 'basic',
+        /** The type of the row selection mechanism.
+         * @additionalinfo If this setting is set to "basic" when the user select a row, then this row will be highlighted.<br/>
+         * If this setting is set to "checkbox" a column with checkboxes will appear as first row of the grid and when the user select a row, then this row will be highlighted and the checkbox selected.
+         * @type (basic|checkbox)
+         * @default "basic"
+         * @example sample <!-- checkbox, grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         selectionType: 'single',
+         *         selectionMethod: 'checkbox',
+         *         columns: [ { field: 'ID' }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         */
+        selectionMethod: 'basic',
 
-        /** When this setting is enabled the content of the grid will be loaded automatically after the creation of the grid.         */        autoLoad: true,
+        /** When this setting is enabled the content of the grid will be loaded automatically after the creation of the grid.
+         * @type boolean
+         * @default true
+         * @example disabled <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         autoLoad: false,
+         *         columns: [ { field: 'ID' }, { field: 'Name' } ]
+         *     });
+         *     grid.reload(); //call .reload() explicitly in order to load the data in the grid
+         * </script>
+         * @example enabled <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         autoLoad: true,
+         *         columns: [ { field: 'ID' }, { field: 'Name' } ]
+         *     });
+         * </script>
+         */
+        autoLoad: true,
 
-        /** The text that is going to be displayed if the grid is empty.         */        notFoundText: undefined,
+        /** The text that is going to be displayed if the grid is empty.
+         * @type string
+         * @default "No records found."
+         * @example sample <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: { url: '/Players/Get', data: { name: 'not existing name' } },
+         *         notFoundText: 'No records found custom message',
+         *         columns: [ { field: 'ID' }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         * @example localization <!-- grid -->
+         * <table id="grid"></table>
+         * <script src="../../dist/modular/grid/js/messages/messages.de-de.js"></script>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: { url: '/Players/Get', data: { name: 'not existing name' } },
+         *         locale: 'de-de',
+         *         columns: [ { field: 'ID' }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         */
+        notFoundText: undefined,
 
-        /** Width of the grid.         */        width: undefined,
+        /** Width of the grid.
+         * @type number
+         * @default undefined
+         * @example sample <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         width: 400,
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         */
+        width: undefined,
 
-        /** Minimum width of the grid.         */        minWidth: undefined,
+        /** Minimum width of the grid.
+         * @type number
+         * @default undefined
+         */
+        minWidth: undefined,
 
         /** This configuration option manage the behaviour of the header row height.
-         * Auto scale if set to to 'autogrow'. All body rows are with the same height if set to 'fixed'.         */        headerRowHeight: 'fixed',
+         * Auto scale if set to to 'autogrow'. All body rows are with the same height if set to 'fixed'.
+         * @type ('autogrow'|'fixed')
+         * @default "fixed"
+         * @example AutoGrow <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var data = [
+         *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+         *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+         *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+         *     ];
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         width: 500,
+         *         headerRowHeight: 'autogrow',
+         *         columns: [ { field: 'ID' }, { field: 'Name' }, { field: 'PlaceOfBirth', title: 'Very very very very long column title', width: 200 } ]
+         *     });
+         * </script>
+         * @example Fixed <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var data = [
+         *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+         *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+         *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+         *     ];
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         width: 500,
+         *         headerRowHeight: 'fixed',
+         *         columns: [ { field: 'ID' }, { field: 'Name' }, { field: 'PlaceOfBirth', title: 'Very very very very long column title', width: 200 } ]
+         *     });
+         * </script>
+         */
+        headerRowHeight: 'fixed',
 
         /** This configuration option manage the behaviour of the body row height.
-         * Auto scale if set to to 'autogrow'. All body rows are with the same height if set to 'fixed'.         */        bodyRowHeight: 'autogrow',
+         * Auto scale if set to to 'autogrow'. All body rows are with the same height if set to 'fixed'.
+         * @type ('autogrow'|'fixed')
+         * @default "autogrow"
+         * @example AutoGrow <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var data = [
+         *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+         *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+         *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+         *     ];
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         width: 500,
+         *         bodyRowHeight: 'autogrow',
+         *         columns: [ { field: 'ID' }, { field: 'Name' }, { field: 'PlaceOfBirth', title: 'Very very very very long column title', width: 200 } ]
+         *     });
+         * </script>
+         * @example Fixed <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var data = [
+         *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+         *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+         *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+         *     ];
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         width: 500,
+         *         bodyRowHeight: 'fixed',
+         *         columns: [ { field: 'ID' }, { field: 'Name' }, { field: 'PlaceOfBirth', title: 'Very very very very long column title', width: 200 } ]
+         *     });
+         * </script>
+         */
+        bodyRowHeight: 'autogrow',
 
-        /** The size of the font in the grid.         */        fontSize: undefined,
+        /** The size of the font in the grid.
+         * @type string
+         * @default undefined
+         * @example sample <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         fontSize: '16px',
+         *         columns: [ { field: 'ID' }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         */
+        fontSize: undefined,
 
-        /** Name of column that contains the record id.          */        primaryKey: undefined,
+        /** Name of column that contains the record id. 
+         * @additionalinfo If you set primary key, we assume that this number is unique for each records presented in the grid.<br/>
+         * For example this should contains the column with primary key from your relation db table.<br/>
+         * If the primaryKey is undefined, we autogenerate id for each record in the table by starting from 1.
+         * @type string
+         * @default undefined
+         * @example defined <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var data = [
+         *         { 'ID': 101, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+         *         { 'ID': 102, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+         *         { 'ID': 103, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+         *     ];
+         *     $('#grid').grid({
+         *         dataSource: data,
+         *         primaryKey: 'ID',
+         *         columns: [ 
+         *             { field: 'ID', width: 70 },
+         *             { field: 'Name' },
+         *             { field: 'PlaceOfBirth' } ,
+         *             { tmpl: '<a href="#">click me</a>', events: { click: function(e) { alert('Your id is ' + e.data.id); } }, width: 100, stopPropagation: true } 
+         *         ]
+         *     });
+         * </script>
+         * @example undefined <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var data = [
+         *         { 'ID': 101, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+         *         { 'ID': 102, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+         *         { 'ID': 103, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+         *     ];
+         *     $('#grid').grid({
+         *         dataSource: data,
+         *         columns: [ 
+         *             { field: 'ID', width: 70 },
+         *             { field: 'Name' },
+         *             { field: 'PlaceOfBirth' } ,
+         *             { tmpl: '<a href="#">click me</a>', events: { click: function(e) { alert('Your id is ' + e.data.id); } }, width: 100, stopPropagation: true } 
+         *         ]
+         *     });
+         * </script>
+         */
+        primaryKey: undefined,
 
-        /** The language that needs to be in use.         */        locale: 'en-us',
+        /** The language that needs to be in use.
+         * @type string
+         * @default 'en-us'
+         * @example German.Bootstrap.Default <!-- bootstrap, grid, dropdown -->
+         * <table id="grid"></table>
+         * <script>
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         uiLibrary: 'bootstrap',
+         *         locale: 'de-de',
+         *         columns: [ 
+         *             { field: 'ID', width: 34 },
+         *             { field: 'Name', title: 'Name' },
+         *             { field: 'PlaceOfBirth', title: 'Geburtsort' }
+         *         ],
+         *         pager: { limit: 5 }
+         *     });
+         * </script>
+         * @example French.MaterialDesign.Custom <!-- grid, dropdown -->
+         * <table id="grid"></table>
+         * <script>
+         *     gj.grid.messages['fr-fr'].DisplayingRecords = 'Mes résultats';
+         *     $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         uiLibrary: 'materialdesign',
+         *         locale: 'fr-fr',
+         *         columns: [ 
+         *             { field: 'ID', width: 56 },
+         *             { field: 'Name', title: 'Prénom' },
+         *             { field: 'PlaceOfBirth', title: 'Lieu de naissance' }
+         *         ],
+         *         pager: { limit: 5 }
+         *     });
+         * </script>
+         */
+        locale: 'en-us',
 
         defaultIconColumnWidth: 70,
         defaultCheckBoxColumnWidth: 70,
@@ -183,79 +1217,331 @@ gj.grid.config = {
     }
 };
 
-/**  */gj.grid.events = {
+/**
+  * @widget Grid
+  * @plugin Base
+  */
+gj.grid.events = {
     /**
-     * Event fires before addition of an empty row to the grid.     */    beforeEmptyRowInsert: function ($grid, $row) {
+     * Event fires before addition of an empty row to the grid.
+     * @event beforeEmptyRowInsert
+     * @param {object} e - event data
+     * @param {object} $row - The empty row as jquery object
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: {
+     *             url: '/Players/Get',
+     *             data: { name: 'not existing data' } //search for not existing data in order to fire the event
+     *         },
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     grid.on('beforeEmptyRowInsert', function (e, $row) {
+     *         alert('beforeEmptyRowInsert is fired.');
+     *     });
+     * </script>
+     */
+    beforeEmptyRowInsert: function ($grid, $row) {
         return $grid.triggerHandler('beforeEmptyRowInsert', [$row]);
     },
 
     /**
      * Event fired before data binding takes place.
-     *     */    dataBinding: function ($grid, records) {
+     *
+     * @event dataBinding
+     * @param {object} e - event data
+     * @param {array} records - the list of records
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     grid.on('dataBinding', function (e, records) {
+     *         alert('dataBinding is fired. ' + records.length + ' records will be loaded in the grid.');
+     *     });
+     * </script>
+     */
+    dataBinding: function ($grid, records) {
         return $grid.triggerHandler('dataBinding', [records]);
     },
 
     /**
      * Event fires after the loading of the data in the grid.
-     *     */    dataBound: function ($grid, records, totalRecords) {
+     *
+     * @event dataBound
+     * @param {object} e - event data
+     * @param {array} records - the list of records
+     * @param {number} totalRecords - the number of the all records that can be presented in the grid
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     grid.on('dataBound', function (e, records, totalRecords) {
+     *         alert('dataBound is fired. ' + records.length + ' records are bound to the grid.');
+     *     });
+     * </script>
+     */
+    dataBound: function ($grid, records, totalRecords) {
         return $grid.triggerHandler('dataBound', [records, totalRecords]);
     },
 
     /**
-     * Event fires after insert of a row in the grid during the loading of the data.     */    rowDataBound: function ($grid, $row, id, record) {
+     * Event fires after insert of a row in the grid during the loading of the data.
+     * @event rowDataBound
+     * @param {object} e - event data
+     * @param {object} $row - the row presented as jquery object
+     * @param {string} id - the id of the record
+     * @param {object} record - the data of the row record
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     grid.on('rowDataBound', function (e, $row, id, record) {
+     *         alert('rowDataBound is fired for row with id=' + id + '.');
+     *     });
+     * </script>
+     */
+    rowDataBound: function ($grid, $row, id, record) {
         return $grid.triggerHandler('rowDataBound', [$row, id, record]);
     },
 
     /**
      * Event fires after insert of a cell in the grid during the loading of the data
-     *     */    cellDataBound: function ($grid, $displayEl, id, column, record) {
+     *
+     * @event cellDataBound
+     * @param {object} e - event data
+     * @param {object} $displayEl - inner div element for display of the cell value presented as jquery object
+     * @param {string} id - the id of the record
+     * @param {object} column - the column configuration data
+     * @param {object} record - the data of the row record
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' }, { field: 'Bulgarian', title: 'Is Bulgarian?' } ]
+     *     });
+     *     grid.on('cellDataBound', function (e, $displayEl, id, column, record) {
+     *         if ('Bulgarian' === column.field) {
+     *             $displayEl.text(record.PlaceOfBirth.indexOf('Bulgaria') > -1 ? 'Yes' : 'No');
+     *         }
+     *     });
+     * </script>
+     */
+    cellDataBound: function ($grid, $displayEl, id, column, record) {
         return $grid.triggerHandler('cellDataBound', [$displayEl, id, column, record]);
     },
 
     /**
      * Event fires on selection of row
-     *     */    rowSelect: function ($grid, $row, id, record) {
+     *
+     * @event rowSelect
+     * @param {object} e - event data
+     * @param {object} $row - the row presented as jquery object
+     * @param {string} id - the id of the record
+     * @param {object} record - the data of the row record
+     * @example sample <!-- checkbox, grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         selectionMethod: 'checkbox'
+     *     });
+     *     grid.on('rowSelect', function (e, $row, id, record) {
+     *         alert('Row with id=' + id + ' is selected.');
+     *     });
+     * </script>
+     */
+    rowSelect: function ($grid, $row, id, record) {
         return $grid.triggerHandler('rowSelect', [$row, id, record]);
     },
 
     /**
      * Event fires on un selection of row
-     *     */    rowUnselect: function ($grid, $row, id, record) {
+     *
+     * @event rowUnselect
+     * @param {object} e - event data
+     * @param {object} $row - the row presented as jquery object
+     * @param {string} id - the id of the record
+     * @param {object} record - the data of the row record
+     * @example sample <!-- checkbox, grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         selectionMethod: 'checkbox'
+     *     });
+     *     grid.on('rowUnselect', function (e, $row, id, record) {
+     *         alert('Row with id=' + id + ' is unselected.');
+     *     });
+     * </script>
+     */
+    rowUnselect: function ($grid, $row, id, record) {
         return $grid.triggerHandler('rowUnselect', [$row, id, record]);
     },
 
     /**
-     * Event fires before deletion of row in the grid.     */    rowRemoving: function ($grid, $row, id, record) {
+     * Event fires before deletion of row in the grid.
+     * @event rowRemoving
+     * @param {object} e - event data
+     * @param {object} $row - the row presented as jquery object
+     * @param {string} id - the id of the record
+     * @param {object} record - the data of the row record
+     * @example sample <!-- grid -->
+     * <button onclick="grid.removeRow('1')" class="gj-button-md">Remove Row</button><br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         primaryKey: 'ID',
+     *         dataSource: [
+     *             { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+     *             { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+     *             { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+     *         ],
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     grid.on('rowRemoving', function (e, $row, id, record) {
+     *         alert('rowRemoving is fired for row with id=' + id + '.');
+     *     });
+     * </script>
+     */
+    rowRemoving: function ($grid, $row, id, record) {
         return $grid.triggerHandler('rowRemoving', [$row, id, record]);
     },
 
     /**
      * Event fires when the grid.destroy method is called.
-     *     */    destroying: function ($grid) {
+     *
+     * @event destroying
+     * @param {object} e - event data
+     * @example sample <!-- grid -->
+     * <button id="btnDestroy" class="gj-button-md">Destroy</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     grid.on('destroying', function (e) {
+     *         alert('destroying is fired.');
+     *     });
+     *     $('#btnDestroy').on('click', function() {
+     *         grid.destroy();
+     *     });
+     * </script>
+     */
+    destroying: function ($grid) {
         return $grid.triggerHandler('destroying');
     },
 
     /**
      * Event fires when column is hidding
-     *     */    columnHide: function ($grid, column) {
+     *
+     * @event columnHide
+     * @param {object} e - event data
+     * @param {object} column - The data about the column that is hidding
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     grid.on('columnHide', function (e, column) {
+     *         alert('The ' + column.field + ' column is hidden.');
+     *     });
+     *     grid.hideColumn('PlaceOfBirth');
+     * </script>
+     */
+    columnHide: function ($grid, column) {
         return $grid.triggerHandler('columnHide', [column]);
     },
 
     /**
      * Event fires when column is showing
-     *     */    columnShow: function ($grid, column) {
+     *
+     * @event columnShow
+     * @param {object} e - event data
+     * @param {object} column - The data about the column that is showing
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth', hidden: true } ]
+     *     });
+     *     grid.on('columnShow', function (e, column) {
+     *         alert('The ' + column.field + ' column is shown.');
+     *     });
+     *     grid.showColumn('PlaceOfBirth');
+     * </script>
+     */
+    columnShow: function ($grid, column) {
         return $grid.triggerHandler('columnShow', [column]);
     },
 
     /**
      * Event fires when grid is initialized.
-     *     */    initialized: function ($grid) {
+     *
+     * @event initialized
+     * @param {object} e - event data
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth', hidden: true } ],
+     *         initialized: function (e) {
+     *             alert('The grid is initialized.');
+     *         }
+     *     });
+     * </script>
+     */
+    initialized: function ($grid) {
         return $grid.triggerHandler('initialized');
     },
 
     /**
      * Event fires when the grid data is filtered.
-     *     */    dataFiltered: function ($grid, records) {
+     *
+     * @additionalinfo This event is firing only when you use local dataSource, because the filtering with remote dataSource needs to be done on the server side.
+     * @event dataFiltered
+     * @param {object} e - event data
+     * @param {object} records - The records after the filtering.
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid, data = [
+     *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria', CountryName: 'Bulgaria' },
+     *         { 'ID': 2, 'Name': 'Ronaldo Luís Nazário de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil', CountryName: 'Brazil' },
+     *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England', CountryName: 'England' },
+     *         { 'ID': 4, 'Name': 'Manuel Neuer', 'PlaceOfBirth': 'Gelsenkirchen, West Germany', CountryName: 'Germany' },
+     *         { 'ID': 5, 'Name': 'James Rodríguez', 'PlaceOfBirth': 'Cúcuta, Colombia', CountryName: 'Colombia' },
+     *         { 'ID': 6, 'Name': 'Dimitar Berbatov', 'PlaceOfBirth': 'Blagoevgrad, Bulgaria', CountryName: 'Bulgaria' }
+     *     ];
+     *     grid = $('#grid').grid({
+     *         dataSource: data,
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         dataFiltered: function (e, records) {
+     *             records.reverse(); // reverse the data
+     *             records.splice(3, 2); // remove 2 elements after the 3rd record
+     *         }
+     *     });
+     * </script>
+     */
+    dataFiltered: function ($grid, records) {
         return $grid.triggerHandler('dataFiltered', [records]);
     }
 };
@@ -1192,96 +2478,556 @@ gj.grid.methods = {
     }
 };
 
-/**  */GijgoGrid = function (element, jsConfig) {
+/**
+  * @widget Grid
+  * @plugin Base
+  */
+GijgoGrid = function (element, jsConfig) {
     var self = this,
         methods = gj.datepicker.methods;
 
     self.element = element;
 
     /**
-     * Reload the data in the grid from a data source.     */    self.reload = function (params) {
+     * Reload the data in the grid from a data source.
+     * @method
+     * @param {object} params - An object that contains a list with parameters that are going to be send to the server.
+     * @fires beforeEmptyRowInsert, dataBinding, dataBound, cellDataBound
+     * @return grid
+     * @example sample <!-- grid -->
+     * <input type="text" id="txtSearch">
+     * <button id="btnSearch">Search</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     $('#btnSearch').on('click', function () {
+     *         grid.reload({ name: $('#txtSearch').val() });
+     *     });
+     * </script>
+     */
+    self.reload = function (params) {
         methods.startLoading(this);
         return gj.widget.prototype.reload.call(this, params);
     };
 
     /**
-     * Clear the content in the grid.     */    self.clear = function (showNotFoundText) {
+     * Clear the content in the grid.
+     * @method
+     * @param {boolean} showNotFoundText - Indicates if the "Not Found" text is going to show after the clearing of the grid.
+     * @return grid
+     * @example sample <!-- grid, dropdown -->
+     * <button id="btnClear" class="gj-button-md">Clear</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         pager: { limit: 5 }
+     *     });
+     *     $('#btnClear').on('click', function () {
+     *         grid.clear();
+     *     });
+     * </script>
+     */
+    self.clear = function (showNotFoundText) {
         return methods.clear(this, showNotFoundText);
     };
 
     /**
-     * Return the number of records in the grid. By default return only the records that are visible in the grid.     */    self.count = function (includeAllRecords) {
+     * Return the number of records in the grid. By default return only the records that are visible in the grid.
+     * @method
+     * @param {boolean} includeAllRecords - include records that are not visible when you are using local dataSource.
+     * @return number
+     * @example Local.DataSource <!-- bootstrap, grid, grid.pagination -->
+     * <button class="btn btn-default" onclick="alert(grid.count())">Count Visible Records</button>
+     * <button class="btn btn-default" onclick="alert(grid.count(true))">Count All Records</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var data, grid;
+     *     data = [
+     *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+     *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+     *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+     *     ];
+     *     grid = $('#grid').grid({
+     *         dataSource: data,
+     *         columns: [ { field: 'ID', width: 34 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         uiLibrary: 'bootstrap',
+     *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+     *     });
+     * </script>
+     * @example Remote.DataSource <!-- bootstrap, grid, grid.pagination -->
+     * <button onclick="alert(grid.count())">Count Visible Records</button>
+     * <button onclick="alert(grid.count(true))">Count All Records</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 34 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         uiLibrary: 'bootstrap',
+     *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+     *     });
+     * </script>
+     */
+    self.count = function (includeAllRecords) {
         return methods.count(this, includeAllRecords);
     };
 
     /**
-     * Render data in the grid     */    self.render = function (response) {
+     * Render data in the grid
+     * @method
+     * @param {object} response - An object that contains the data that needs to be loaded in the grid.
+     * @fires beforeEmptyRowInsert, dataBinding, dataBound, cellDataBound
+     * @return grid
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid, onSuccessFunc;
+     *     onSuccessFunc = function (response) {
+     *         //you can modify the response here if needed
+     *         grid.render(response);
+     *     };
+     *     grid = $('#grid').grid({
+     *         dataSource: { url: '/Players/Get', success: onSuccessFunc },
+     *         columns: [ { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     * </script>
+     */
+    self.render = function (response) {
         return methods.render($grid, response);
     };
 
     /**
-     * Destroy the grid. This method remove all data from the grid and all events attached to the grid.     */    self.destroy = function (keepTableTag, keepWrapperTag) {
+     * Destroy the grid. This method remove all data from the grid and all events attached to the grid.
+     * @additionalinfo The grid table tag and wrapper tag are kept by default after the execution of destroy method,
+     * but you can remove them if you pass false to the keepTableTag and keepWrapperTag parameters.
+     * @method
+     * @param {boolean} keepTableTag - If this flag is set to false, the table tag will be removed from the HTML dom tree.
+     * @param {boolean} keepWrapperTag - If this flag is set to false, the table wrapper tag will be removed from the HTML dom tree.
+     * @fires destroying
+     * @return void
+     * @example keep.wrapper.and.table <!-- grid -->
+     * <button class="gj-button-md" id="btnDestroy">Destroy</button>
+     * <button class="gj-button-md" id="btnCreate">Create</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var createFunc = function() {
+     *         $('#grid').grid({
+     *             dataSource: '/Players/Get',
+     *             columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *         });
+     *     };
+     *     createFunc();
+     *     $('#btnDestroy').on('click', function () {
+     *         $('#grid').grid('destroy', true, true);
+     *     });
+     *     $('#btnCreate').on('click', function () {
+     *         createFunc();
+     *     });
+     * </script>
+     * @example remove.wrapper.and.table <!-- grid -->
+     * <button class="gj-button-md" id="btnRemove">Remove</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     $('#btnRemove').on('click', function () {
+     *         grid.destroy();
+     *     });
+     * </script>
+     */
+    self.destroy = function (keepTableTag, keepWrapperTag) {
         return methods.destroy(this, keepTableTag, keepWrapperTag);
     };
 
     /**
-     * Select a row from the grid based on id parameter.     */    self.setSelected = function (id) {
+     * Select a row from the grid based on id parameter.
+     * @method
+     * @param {string} id - The id of the row that needs to be selected
+     * @return grid
+     * @example sample <!-- checkbox, grid -->
+     * <input type="text" id="txtNumber" value="1" />
+     * <button id="btnSelect" class="gj-button-md">Select</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         selectionMethod: 'checkbox'
+     *     });
+     *     $('#btnSelect').on('click', function () {
+     *         grid.setSelected(parseInt($('#txtNumber').val(), 10));
+     *     });
+     * </script>
+     */
+    self.setSelected = function (id) {
         return methods.setSelected(this, id);
     };
 
     /**
      * Return the id of the selected record.
-     * If the multiple selection method is one this method is going to return only the id of the first selected record.     */    self.getSelected = function () {
+     * If the multiple selection method is one this method is going to return only the id of the first selected record.
+     * @method
+     * @return string
+     * @example sample <!-- checkbox, grid -->
+     * <button id="btnShowSelection" class="gj-button-md">Show Selection</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         selectionMethod: 'checkbox'
+     *     });
+     *     $('#btnShowSelection').on('click', function () {
+     *         alert(grid.getSelected());
+     *     });
+     * </script>
+     */
+    self.getSelected = function () {
         return methods.getSelected(this);
     };
 
     /**
-     * Return an array with the ids of the selected record.     */    self.getSelections = function () {
+     * Return an array with the ids of the selected record.
+     * @additionalinfo Specify primaryKey if you want to use field from the dataSource as identificator for selection.
+     * @method
+     * @return array
+     * @example With.Primary.Ket <!-- checkbox, grid, dropdown -->
+     * <button id="btnShowSelection" class="gj-button-md">Show Selections</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid, data = [
+     *         { 'ID': 101, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+     *         { 'ID': 102, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+     *         { 'ID': 103, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' },
+     *         { 'ID': 104, 'Name': 'Manuel Neuer', 'PlaceOfBirth': 'Gelsenkirchen, West Germany' }
+     *     ];
+     *     grid = $('#grid').grid({
+     *         dataSource: data,
+     *         primaryKey: 'ID',
+     *         columns: [ { field: 'ID', width: 70 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         selectionMethod: 'checkbox',
+     *         selectionType: 'multiple',
+     *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+     *     });
+     *     $('#btnShowSelection').on('click', function () {
+     *         var selections = grid.getSelections();
+     *         alert(selections.join());
+     *     });
+     * </script>
+     * @example Without.Primary.Ket <!-- checkbox, grid, dropdown -->
+     * <button id="btnShowSelection" class="gj-button-md">Show Selections</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid, data = [
+     *         { 'ID': 101, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+     *         { 'ID': 102, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+     *         { 'ID': 103, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' },
+     *         { 'ID': 104, 'Name': 'Manuel Neuer', 'PlaceOfBirth': 'Gelsenkirchen, West Germany' }
+     *     ];
+     *     grid = $('#grid').grid({
+     *         dataSource: data,
+     *         columns: [ { field: 'ID', width: 70 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         selectionMethod: 'checkbox',
+     *         selectionType: 'multiple',
+     *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+     *     });
+     *     $('#btnShowSelection').on('click', function () {
+     *         var selections = grid.getSelections();
+     *         alert(selections.join());
+     *     });
+     * </script>
+     */
+    self.getSelections = function () {
         return methods.getSelections(this);
     };
 
     /**
-     * Select all records from the grid.     */    self.selectAll = function () {
+     * Select all records from the grid.
+     * @method
+     * @return grid
+     * @example sample <!-- checkbox, grid -->
+     * <button id="btnSelectAll" class="gj-button-md">Select All</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         selectionMethod: 'checkbox',
+     *         selectionType: 'multiple'
+     *     });
+     *     $('#btnSelectAll').on('click', function () {
+     *         grid.selectAll();
+     *     });
+     * </script>
+     */
+    self.selectAll = function () {
         return methods.selectAll(this);
     };
 
     /**
-     * Unselect all records from the grid.     */    self.unSelectAll = function () {
+     * Unselect all records from the grid.
+     * @method
+     * @return void
+     * @example sample <!-- checkbox, grid -->
+     * <button id="btnSelectAll" class="gj-button-md">Select All</button>
+     * <button id="btnUnSelectAll" class="gj-button-md">UnSelect All</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         selectionMethod: 'checkbox',
+     *         selectionType: 'multiple'
+     *     });
+     *     $('#btnSelectAll').on('click', function () {
+     *         grid.selectAll();
+     *     });
+     *     $('#btnUnSelectAll').on('click', function () {
+     *         grid.unSelectAll();
+     *     });
+     * </script>
+     */
+    self.unSelectAll = function () {
         return methods.unSelectAll(this);
     };
 
     /**
-     * Return record by id of the record.     */    self.getById = function (id) {
+     * Return record by id of the record.
+     * @method
+     * @param {string} id - The id of the row that needs to be returned.
+     * @return object
+     * @example sample <!-- grid -->
+     * <button id="btnGetData" class="gj-button-md">Get Data</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         primaryKey: 'ID' //define the name of the column that you want to use as ID here.
+     *     });
+     *     $('#btnGetData').on('click', function () {
+     *         var data = grid.getById('2');
+     *         alert(data.Name + ' born in ' + data.PlaceOfBirth);
+     *     });
+     * </script>
+     */
+    self.getById = function (id) {
         return methods.getById(this, id);
     };
 
     /**
-     * Return record from the grid based on position.     */    self.get = function (position) {
+     * Return record from the grid based on position.
+     * @method
+     * @param {number} position - The position of the row that needs to be return.
+     * @return object
+     * @example sample <!-- grid -->
+     * <button id="btnGetData" class="gj-button-md">Get Data</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     $('#btnGetData').on('click', function () {
+     *         var data = grid.get(3);
+     *         alert(data.Name + ' born in ' + data.PlaceOfBirth);
+     *     });
+     * </script>
+     */
+    self.get = function (position) {
         return methods.getByPosition(this, position);
     };
 
     /**
-     * Return an array with all records presented in the grid.     */    self.getAll = function (includeAllRecords) {
+     * Return an array with all records presented in the grid.
+     * @method
+     * @param {boolean} includeAllRecords - include records that are not visible when you are using local dataSource.
+     * @return number
+     * @example Local.DataSource <!-- bootstrap, grid, grid.pagination -->
+     * <button onclick="alert(JSON.stringify(grid.getAll()))" class="btn btn-default">Get All Visible Records</button>
+     * <button onclick="alert(JSON.stringify(grid.getAll(true)))" class="btn btn-default">Get All Records</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var data, grid;
+     *     data = [
+     *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+     *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+     *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+     *     ];
+     *     grid = $('#grid').grid({
+     *         dataSource: data,
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         uiLibrary: 'bootstrap',
+     *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+     *     });
+     * </script>
+     * @example Remote.DataSource <!-- bootstrap, grid, grid.pagination -->
+     * <button onclick="alert(JSON.stringify(grid.getAll()))" class="btn btn-default">Get All Visible Records</button>
+     * <button onclick="alert(JSON.stringify(grid.getAll(true)))" class="btn btn-default">Get All Records</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+     *         uiLibrary: 'bootstrap',
+     *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+     *     });
+     * </script>
+     */
+    self.getAll = function (includeAllRecords) {
         return methods.getAll(this, includeAllRecords);
     };
 
     /**
-     * Show hidden column.     */    self.showColumn = function (field) {
+     * Show hidden column.
+     * @method
+     * @param {string} field - The name of the field bound to the column.
+     * @return grid
+     * @example sample <!-- grid -->
+     * <button id="btnShowColumn" class="gj-button-md">Show Column</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth', hidden: true } ]
+     *     });
+     *     $('#btnShowColumn').on('click', function () {
+     *         grid.showColumn('PlaceOfBirth');
+     *     });
+     * </script>
+     */
+    self.showColumn = function (field) {
         return methods.showColumn(this, field);
     };
 
     /**
-     * Hide column from the grid.     */    self.hideColumn = function (field) {
+     * Hide column from the grid.
+     * @method
+     * @param {string} field - The name of the field bound to the column.
+     * @return grid
+     * @example sample <!-- grid -->
+     * <button id="btnHideColumn" class="gj-button-md">Hide Column</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     $('#btnHideColumn').on('click', function () {
+     *         grid.hideColumn('PlaceOfBirth');
+     *     });
+     * </script>
+     */
+    self.hideColumn = function (field) {
         return methods.hideColumn(this, field);
     };
 
     /**
-     * Add new row to the grid.     */    self.addRow = function (record) {
+     * Add new row to the grid.
+     * @method
+     * @param {object} record - Object with data for the new record.
+     * @return grid
+     * @example without.pagination <!-- grid -->
+     * <button id="btnAdd" class="gj-button-md">Add Row</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: [
+     *             { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+     *             { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+     *             { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+     *         ],
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+     *     });
+     *     $('#btnAdd').on('click', function () {
+     *         grid.addRow({ 'ID': grid.count(true) + 1, 'Name': 'Test Player', 'PlaceOfBirth': 'Test City, Test Country' });
+     *     });
+     * </script>
+     * @example with.pagination <!-- grid, dropdown -->
+     * <button id="btnAdd" class="gj-button-md">Add Row</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         primaryKey: 'ID',
+     *         dataSource: [
+     *             { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+     *             { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+     *             { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+     *         ],
+     *         columns: [ 
+     *             { field: 'ID', width: 56 },
+     *             { field: 'Name' },
+     *             { field: 'PlaceOfBirth' },
+     *             { width: 100, align: 'center', tmpl: '<i class="material-icons">delete</i>', events: { 'click': function(e) { grid.removeRow(e.data.id); } } }
+     *         ],
+     *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+     *     });
+     *     $('#btnAdd').on('click', function () {
+     *         grid.addRow({ 'ID': grid.count(true) + 1, 'Name': 'Test Player', 'PlaceOfBirth': 'Test City, Test Country' });
+     *     });
+     * </script>
+     */
+    self.addRow = function (record) {
         return methods.addRow(this, record);
     };
 
     /**
-     * Update row data.     */    self.updateRow = function (id, record) {
+     * Update row data.
+     * @method
+     * @param {string} id - The id of the row that needs to be updated
+     * @param {object} record - Object with data for the new record.
+     * @return grid
+     * @example sample <!-- grid, dropdown -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid;
+     *     grid = $('#grid').grid({
+     *         primaryKey: 'ID',
+     *         dataSource: [
+     *             { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+     *             { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+     *             { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+     *         ],
+     *         columns: [
+     *             { field: 'ID', width: 56 },
+     *             { field: 'Name' },
+     *             { field: 'PlaceOfBirth' },
+     *             { title: '', width: 90, align: 'center', tmpl: '<u>Edit</u>', events: { 'click': Edit } }
+     *         ],
+     *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+     *     });
+     *     function Edit(e) {
+     *         grid.updateRow(e.data.id, { 'ID': e.data.id, 'Name': 'Ronaldo', 'PlaceOfBirth': 'Rio, Brazil' });
+     *     }
+     * </script>
+     */
+    self.updateRow = function (id, record) {
         return methods.updateRow(this, id, record);
     };
 
@@ -1291,7 +3037,62 @@ gj.grid.methods = {
     };
 
     /**
-     * Remove row from the grid     */    self.removeRow = function (id) {
+     * Remove row from the grid
+     * @additionalinfo This method is design to work only with local datasources. If you use remote datasource, you need to send a request to the server to remove the row and then reload the data in the grid.
+     * @method
+     * @param {string} id - Id of the record that needs to be removed.
+     * @return grid
+     * @example Without.Pagination <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid;
+     *     function Delete(e) {
+     *         if (confirm('Are you sure?')) {
+     *             grid.removeRow(e.data.id);
+     *         }
+     *     }
+     *     grid = $('#grid').grid({
+     *         primaryKey: 'ID',
+     *         dataSource: [
+     *             { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+     *             { 'ID': 2, 'Name': 'Ronaldo Luís Nazário de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+     *             { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+     *         ],
+     *         columns: [
+     *             { field: 'ID', width: 56 },
+     *             { field: 'Name' },
+     *             { field: 'PlaceOfBirth' },
+     *             { width: 100, align: 'center', tmpl: '<u class="gj-cursor-pointer">Delete</u>', events: { 'click': Delete } }
+     *         ]
+     *     });
+     * </script>
+     * @example With.Pagination <!-- grid, dropdown -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid;
+     *     function Delete(e) {
+     *         if (confirm('Are you sure?')) {
+     *             grid.removeRow(e.data.id);
+     *         }
+     *     }
+     *     grid = $('#grid').grid({
+     *         primaryKey: 'ID',
+     *         dataSource: [
+     *             { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+     *             { 'ID': 2, 'Name': 'Ronaldo Luís Nazário de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+     *             { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+     *         ],
+     *         columns: [
+     *             { field: 'ID', width: 56 },
+     *             { field: 'Name' },
+     *             { field: 'PlaceOfBirth' },
+     *             { width: 100, align: 'center', tmpl: '<u class="gj-cursor-pointer">Delete</u>', events: { 'click': Delete } }
+     *         ],
+     *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+     *     });
+     * </script>
+     */
+    self.removeRow = function (id) {
         return methods.removeRow(this, id);
     };
 
@@ -1329,11 +3130,84 @@ if (typeof (jQuery) !== "undefined") {
     })(jQuery);
 }
 
-/** */gj.grid.plugins.fixedHeader = {
+/**
+ * @widget Grid
+ * @plugin Fixed Header
+ */
+gj.grid.plugins.fixedHeader = {
     config: {
         base: {
 
-            /** If set to true, add scroll to the table body             */            fixedHeader: false,
+            /** If set to true, add scroll to the table body
+             * @type boolean
+             * @default object
+             * @example Material.Design.Without.Pager <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         fixedHeader: true,
+             *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             * @example Material.Design.With.Pager <!-- grid, dropdown -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         fixedHeader: true,
+             *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+             *         pager: { limit: 5 }
+             *     });
+             * </script>
+             * @example Bootstrap.3.Without.Pager <!-- bootstrap, grid -->
+             * <div class="container"><table id="grid"></table></div>
+             * <script>
+             *     $('#grid').grid({
+             *         uiLibrary: 'bootstrap',
+             *         dataSource: '/Players/Get',
+             *         fixedHeader: true,
+             *         height: 200,
+             *         columns: [ 
+             *             { field: 'ID', width: 34 },
+             *             { field: 'Name' },
+             *             { field: 'PlaceOfBirth' }
+             *         ]
+             *     });
+             * </script>
+             * @example Bootstrap.3.With.Pager <!-- bootstrap, grid -->
+             * <div class="container"><table id="grid"></table></div>
+             * <script>
+             *     $('#grid').grid({
+             *         uiLibrary: 'bootstrap',
+             *         dataSource: '/Players/Get',
+             *         fixedHeader: true,
+             *         height: 200,
+             *         columns: [ 
+             *             { field: 'ID', width: 34 }, 
+             *             { field: 'Name' }, 
+             *             { field: 'PlaceOfBirth' } 
+             *         ],
+             *         pager: { limit: 5 }
+             *     });
+             * </script>
+             * @example Bootstrap.4 <!-- bootstrap4, grid -->
+             * <div class="container"><table id="grid"></table></div>
+             * <script>
+             *     $('#grid').grid({
+             *         uiLibrary: 'bootstrap4',
+             *         dataSource: '/Players/Get',
+             *         fixedHeader: true,
+             *         columns: [ 
+             *             { field: 'ID', width: 42 }, 
+             *             { field: 'Name' }, 
+             *             { field: 'PlaceOfBirth' } 
+             *         ],
+             *         pager: { limit: 5 }
+             *     });
+             * </script>
+             */
+            fixedHeader: false,
 
             height: 300
         }
@@ -1431,21 +3305,121 @@ if (typeof (jQuery) !== "undefined") {
     }
 };
 
-/**  */gj.grid.plugins.expandCollapseRows = {
+/** 
+ * @widget Grid 
+ * @plugin Expand Collapse Rows
+ */
+gj.grid.plugins.expandCollapseRows = {
     config: {
         base: {
             /** Template for the content in the detail section of the row.
-             * Automatically add expand collapse column as a first column in the grid during initialization.             */            detailTemplate: undefined,
+             * Automatically add expand collapse column as a first column in the grid during initialization.
+             * @type string
+             * @default undefined
+             * @example Material.Design <!-- grid, grid.expandCollapseRows -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'materialdesign',
+             *         detailTemplate: '<div style="text-align: left"><b>Place Of Birth:</b> {PlaceOfBirth}</div>',
+             *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'DateOfBirth', type: 'date' } ]
+             *     });
+             * </script>
+             * @example Bootstrap.3 <!-- bootstrap, grid, grid.expandCollapseRows -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap',
+             *         detailTemplate: '<div><b>Place Of Birth:</b> {PlaceOfBirth}</div>',
+             *         columns: [ { field: 'ID', width: 34 }, { field: 'Name' }, { field: 'DateOfBirth', type: 'date' } ]
+             *     });
+             * </script>
+             * @example Bootstrap.4.Font.Awesome <!-- bootstrap4, fontawesome, grid, grid.expandCollapseRows -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap4',
+             *         iconsLibrary: 'fontawesome',
+             *         detailTemplate: '<div><b>Place Of Birth:</b> {PlaceOfBirth}</div>',
+             *         columns: [ { field: 'ID', width: 34 }, { field: 'Name' }, { field: 'DateOfBirth', type: 'date' } ]
+             *     });
+             * </script>
+             */
+            detailTemplate: undefined,
 
             /** If set try to persist the state of expanded rows.
-             * You need to specify primaryKey on the initialization of the grid in order to enable this feature.             */            keepExpandedRows: true,
+             * You need to specify primaryKey on the initialization of the grid in order to enable this feature.
+             * @default true
+             * @example True <!-- bootstrap, grid  -->
+             * <div class="container">
+             *     <div class="row">
+             *         <div class="col-xs-12">
+             *             <p>Expand row, then change the page and return back to the page with expanded row in order to see that the expansion is kept.</p>
+             *             <table id="grid"></table>
+             *         </div>
+             *     </div>
+             * </div>
+             * <script>
+             *     var grid = $('#grid').grid({
+             *         uiLibrary: 'bootstrap',
+             *         primaryKey: 'ID',
+             *         dataSource: '/Players/Get',
+             *         columns: [ { field: 'ID', width: 34 }, { field: 'Name' } ],
+             *         detailTemplate: '<div><b>Place Of Birth:</b> {PlaceOfBirth}</div>',
+             *         keepExpandedRows: true,
+             *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+             *     });
+             * </script>
+             */
+            keepExpandedRows: true,
 
             expandedRows: [],
 
             icons: {
-                /** Expand row icon definition.                 */                expandRow: '<i class="gj-icon chevron-right" />',
+                /** Expand row icon definition.
+                 * @alias icons.expandRow
+                 * @type String
+                 * @default '<i class="gj-icon chevron-right" />'
+                 * @example Plus.Minus.Icons <!-- materialicons, grid -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     $('#grid').grid({
+                 *         primaryKey: 'ID',
+                 *         dataSource: '/Players/Get',
+                 *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' } ],
+                 *         detailTemplate: '<div><b>Place Of Birth:</b> {PlaceOfBirth}</div>',
+                 *         icons: {
+                 *             expandRow: '<i class="material-icons">add</i>',
+                 *             collapseRow: '<i class="material-icons">remove</i>'
+                 *         }
+                 *     });
+                 * </script>
+                 */
+                expandRow: '<i class="gj-icon chevron-right" />',
 
-                /** Collapse row icon definition.                 */                collapseRow: '<i class="gj-icon chevron-down" />'
+                /** Collapse row icon definition.
+                 * @alias icons.collapseRow
+                 * @type String
+                 * @default '<i class="gj-icon chevron-down" />'
+                 * @example Plus.Minus.Icons <!-- materialicons, grid -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     $('#grid').grid({
+                 *         primaryKey: 'ID',
+                 *         dataSource: '/Players/Get',
+                 *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' } ],
+                 *         detailTemplate: '<div><b>Place Of Birth:</b> {PlaceOfBirth}</div>',
+                 *         icons: {
+                 *             expandRow: '<i class="material-icons">add</i>',
+                 *             collapseRow: '<i class="material-icons">remove</i>'
+                 *         }
+                 *     });
+                 * </script>
+                 */
+                collapseRow: '<i class="gj-icon chevron-down" />'
             }
         },
 
@@ -1532,7 +3506,24 @@ if (typeof (jQuery) !== "undefined") {
     'public': {
 
         /**
-         * Collapse all grid rows.         */        collapseAll: function () {
+         * Collapse all grid rows.
+         * @method
+         * @return jQuery object
+         * @example Sample <!-- grid -->
+         * <button onclick="grid.expandAll()" class="gj-button-md">Expand All</button>
+         * <button onclick="grid.collapseAll()" class="gj-button-md">Collapse All</button>
+         * <br/><br/>
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         detailTemplate: '<div style="text-align: left"><b>Place Of Birth:</b> {PlaceOfBirth}</div>',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'DateOfBirth', type: 'date' } ],
+         *         grouping: { groupBy: 'CountryName' },
+         *     });
+         * </script>
+         */
+        collapseAll: function () {
             var $grid = this, data = $grid.data(), position;
                 
 
@@ -1552,7 +3543,24 @@ if (typeof (jQuery) !== "undefined") {
         },
 
         /**
-         * Expand all grid rows.         */        expandAll: function () {
+         * Expand all grid rows.
+         * @method
+         * @return jQuery object
+         * @example Sample <!-- grid -->
+         * <button onclick="grid.expandAll()" class="gj-button-md">Expand All</button>
+         * <button onclick="grid.collapseAll()" class="gj-button-md">Collapse All</button>
+         * <br/><br/>
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         detailTemplate: '<div style="text-align: left"><b>Place Of Birth:</b> {PlaceOfBirth}</div>',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'DateOfBirth', type: 'date' } ],
+         *         grouping: { groupBy: 'CountryName' },
+         *     });
+         * </script>
+         */
+        expandAll: function () {
             var $grid = this, data = $grid.data(), position;
 
             if (typeof (data.detailTemplate) !== 'undefined') {
@@ -1591,13 +3599,57 @@ if (typeof (jQuery) !== "undefined") {
     'events': {
         /**
          * Event fires when detail row is showing
-         *         */        detailExpand: function ($grid, $detailWrapper, id) {
+         *
+         * @event detailExpand
+         * @param {object} e - event data
+         * @param {object} detailWrapper - the detail wrapper as jQuery object 
+         * @param {string} id - the id of the record
+         * @example sample <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         primaryKey: 'ID',
+         *         dataSource: '/Players/Get',
+         *         detailTemplate: '<div></div>',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'DateOfBirth', type: 'date' } ]
+         *     });
+         *     grid.on('detailExpand', function (e, $detailWrapper, id) {
+         *         var record = grid.getById(id);
+         *         $detailWrapper.empty().append('<b>Place Of Birth:</b> ' + record.PlaceOfBirth);
+         *     });
+         * </script>
+         */
+        detailExpand: function ($grid, $detailWrapper, id) {
             $grid.triggerHandler('detailExpand', [$detailWrapper, id]);
         },
 
         /**
          * Event fires when detail row is hiding
-         *         */        detailCollapse: function ($grid, $detailWrapper, id) {
+         *
+         * @event detailCollapse
+         * @param {object} e - event data
+         * @param {object} detailWrapper - the detail wrapper as jQuery object 
+         * @param {string} id - the id of the record
+         * @example sample <!-- grid -->
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         primaryKey: 'ID',
+         *         dataSource: '/Players/Get',
+         *         detailTemplate: '<div></div>',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'DateOfBirth', type: 'date' } ]
+         *     });
+         *     grid.on('detailExpand', function (e, $detailWrapper, id) {
+         *         var record = grid.getById(id);
+         *         $detailWrapper.append('<b>Place Of Birth:</b>' + record.PlaceOfBirth);
+         *     });
+         *     grid.on('detailCollapse', function (e, $detailWrapper, id) {
+         *         $detailWrapper.empty();
+         *         alert('detailCollapse is fired.');
+         *     });
+         * </script>
+         */
+        detailCollapse: function ($grid, $detailWrapper, id) {
             $grid.triggerHandler('detailCollapse', [$detailWrapper, id]);
         }
     },
@@ -1665,7 +3717,11 @@ if (typeof (jQuery) !== "undefined") {
         }
     }
 };
-/**  */gj.grid.plugins.inlineEditing = {
+/** 
+ * @widget Grid 
+ * @plugin Inline Editing
+ */
+gj.grid.plugins.inlineEditing = {
     renderers: {
         editManager: function (value, record, $cell, $displayEl, id, $grid) {
             var data = $grid.data(),
@@ -1693,17 +3749,316 @@ if (typeof (jQuery) !== "undefined") {
 gj.grid.plugins.inlineEditing.config = {
     base: {
         defaultColumnSettings: {
-            /** Provides a way to set an editing UI for the column.             */            editor: undefined,
+            /** Provides a way to set an editing UI for the column.
+             * @alias column.editor
+             * @type function|boolean
+             * @default undefined
+             * @example Material.Design <!-- grid, datepicker, dropdown, checkbox -->
+             * <table id="grid"></table>
+             * <script>
+             *     var countries = [ 'Bulgaria', 'Brazil', 'England', 'Germany', 'Colombia', 'Poland' ];
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'Name', editor: true },
+             *             { field: 'CountryName', type: 'dropdown', editor: { dataSource: countries } },
+             *             { field: 'DateOfBirth', type: 'date', editor: true, format: 'dd.mm.yyyy' },
+             *             { field: 'IsActive', title: 'Active?', type:'checkbox', editor: true, mode: 'editOnly', width: 80, align: 'center' }
+             *         ]
+             *     });
+             * </script>
+             * @example Custom.With.Select2 <!-- grid, datepicker, checkbox -->
+             * <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+             * <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+             * <table id="grid"></table>
+             * <script>
+             *     function select2editor($editorContainer, value, record) {
+             *         var select = $('<select><option value="Bulgaria">Bulgaria</option><option value="Brazil">Brazil</option><option value="England">England</option><option value="Germany">Germany</option><option value="Colombia">Colombia</option><option value="Poland">Poland</option></select>');
+             *         $editorContainer.append(select);
+             *         select.select2();
+             *     }
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'Name', editor: true },
+             *             { field: 'CountryName', type: 'dropdown', editor: select2editor },
+             *             { field: 'DateOfBirth', type: 'date', editor: true, format: 'dd.mm.yyyy' },
+             *             { field: 'IsActive', title: 'Active?', type:'checkbox', editor: true, mode: 'editOnly', width: 80, align: 'center' }
+             *         ]
+             *     });
+             * </script>
+             * @example Bootstrap.3 <!-- bootstrap, grid, datepicker, dropdown, checkbox -->
+             * <table id="grid"></table>
+             * <script>
+             *     var countries = [ 'Bulgaria', 'Brazil', 'England', 'Germany', 'Colombia', 'Poland' ];
+             *     $('#grid').grid({
+             *         uiLibrary: 'bootstrap',
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'Name', editor: true },
+             *             { field: 'CountryName', type: 'dropdown', editor: { dataSource: countries } },
+             *             { field: 'DateOfBirth', type: 'date', editor: true },
+             *             { field: 'IsActive', title: 'Active?', type:'checkbox', editor: true, mode: 'editOnly', width: 80, align: 'center' }
+             *         ]
+             *     });
+             * </script>
+             * @example Bootstrap.4 <!-- bootstrap4, grid, datepicker, dropdown, checkbox -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         uiLibrary: 'bootstrap4',
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'Name', editor: true },
+             *             { field: 'CountryName', type: 'dropdown', editor: { dataSource: '/Locations/GetCountries', valueField: 'id' }, editField: 'CountryID'  },
+             *             { field: 'DateOfBirth', type: 'date', editor: true },
+             *             { field: 'IsActive', title: 'Active?', type:'checkbox', editor: true, mode: 'editOnly', width: 80, align: 'center' }
+             *         ]
+             *     });
+             * </script>
+             */
+            editor: undefined,
 
-            /** The name of the field in the grid data where the grid is going to set the new value.             */            editField: undefined,
+            /** The name of the field in the grid data where the grid is going to set the new value.
+             * @additionalinfo This is usable when the editor is interface with key/value pairs like dropdowns where the key needs to be updated in a different field..
+             * @alias column.editField
+             * @type String
+             * @default undefined
+             * @example Bootstrap.4 <!-- bootstrap4, grid, datepicker, dropdown, checkbox -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         uiLibrary: 'bootstrap4',
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'Name', editor: true },
+             *             { field: 'CountryName', type: 'dropdown', editor: { dataSource: '/Locations/GetCountries', valueField: 'id' }, editField: 'CountryID' },
+             *             { field: 'DateOfBirth', type: 'date', editor: true },
+             *             { field: 'IsActive', title: 'Active?', type:'checkbox', editor: true, mode: 'editOnly', width: 80, align: 'center' }
+             *         ]
+             *     });
+             * </script>
+             */
+            editField: undefined,
 
-            /** Provides a way to specify a display mode for the column.             */            mode: 'readEdit'
+            /** Provides a way to specify a display mode for the column.
+             * @alias column.mode
+             * @type readEdit|editOnly|readOnly
+             * @default readEdit
+             * @example sample <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', editor: true, mode: 'editOnly' },
+             *             { field: 'PlaceOfBirth', editor: true, mode: 'readOnly' }
+             *         ]
+             *     });
+             * </script>
+             */
+            mode: 'readEdit'
         },
         inlineEditing: {
 
-            /** Inline editing mode.             */            mode: 'click',
+            /** Inline editing mode.
+             * @alias inlineEditing.mode
+             * @type click|dblclick|command
+             * @default 'click'
+             * @example Double.Click <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid = $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         primaryKey: 'ID',
+             *         inlineEditing: { mode: 'dblclick' },
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', editor: true },
+             *             { field: 'PlaceOfBirth', editor: true }
+             *         ]
+             *     });
+             * </script>
+             * @example Command <!-- dropdown, grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid, data = [
+             *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+             *         { 'ID': 2, 'Name': 'Ronaldo Luís Nazário de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+             *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' },
+             *         { 'ID': 4, 'Name': 'Manuel Neuer', 'PlaceOfBirth': 'Gelsenkirchen, West Germany' },
+             *         { 'ID': 5, 'Name': 'James Rodríguez', 'PlaceOfBirth': 'Cúcuta, Colombia' },
+             *         { 'ID': 6, 'Name': 'Dimitar Berbatov', 'PlaceOfBirth': 'Blagoevgrad, Bulgaria' }
+             *     ];
+             *     grid = $('#grid').grid({
+             *         dataSource: data,
+             *         primaryKey: 'ID',
+             *         inlineEditing: { mode: 'command' },
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', editor: true },
+             *             { field: 'PlaceOfBirth', editor: true }
+             *         ],
+             *         pager: { limit: 3 }
+             *     });
+             * </script>
+             * @example DateTime <!-- datetimepicker, grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid, data = [
+             *         { 'ID': 1, 'Date': '05/15/2018', 'Time': '21:12', 'DateTime': '21:12 05/15/2018' },
+             *         { 'ID': 2, 'Date': '05/16/2018', 'Time': '22:12', 'DateTime': '22:12 05/16/2018' },
+             *         { 'ID': 3, 'Date': '05/17/2018', 'Time': '23:12', 'DateTime': '23:12 05/17/2018' }
+             *     ];
+             *     grid = $('#grid').grid({
+             *         dataSource: data,
+             *         primaryKey: 'ID',
+             *         inlineEditing: { mode: 'command' },
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Date', type: 'date', format: 'mm/dd/yyyy', editor: true },
+             *             { field: 'Time', type: 'time', format: 'HH:MM', editor: true },
+             *             { field: 'DateTime', type: 'datetime', format: 'HH:MM mm/dd/yyyy', editor: true }
+             *         ]
+             *     });
+             * </script>
+             */
+            mode: 'click',
                 
-            /** If set to true, add column with buttons for edit, delete, update and cancel at the end of the grid.            */            managementColumn: true,
+            /** If set to true, add column with buttons for edit, delete, update and cancel at the end of the grid.
+             * @alias inlineEditing.managementColumn
+             * @type Boolean
+             * @default true
+             * @example True <!-- grid, checkbox, datepicker -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid, data = [
+             *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria', 'DateOfBirth': '\/Date(-122954400000)\/', IsActive: false },
+             *         { 'ID': 2, 'Name': 'Ronaldo Luís Nazário de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil', 'DateOfBirth': '\/Date(211842000000)\/', IsActive: false },
+             *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England', 'DateOfBirth': '\/Date(-112417200000)\/', IsActive: false },
+             *         { 'ID': 4, 'Name': 'Manuel Neuer', 'PlaceOfBirth': 'Gelsenkirchen, West Germany', 'DateOfBirth': '\/Date(512258400000)\/', IsActive: true },
+             *         { 'ID': 5, 'Name': 'James Rodríguez', 'PlaceOfBirth': 'Cúcuta, Colombia', 'DateOfBirth': '\/Date(679266000000)\/', IsActive: true },
+             *         { 'ID': 6, 'Name': 'Dimitar Berbatov', 'PlaceOfBirth': 'Blagoevgrad, Bulgaria', 'DateOfBirth': '\/Date(349653600000)\/', IsActive: false }
+             *     ];
+             *     grid = $('#grid').grid({
+             *         dataSource: data,
+             *         primaryKey: 'ID',
+             *         inlineEditing: { mode: 'command', managementColumn: true },
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', editor: true },
+             *             { field: 'PlaceOfBirth', editor: true },
+             *             { field: 'DateOfBirth', type: 'date', editor: true },
+             *             { field: 'IsActive', title: 'Active?', type: 'checkbox', editor: true, width: 100, align: 'center' }
+             *         ]
+             *     });
+             * </script>
+             * @example False <!-- materialicons, grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid, editManager, data = [
+             *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+             *         { 'ID': 2, 'Name': 'Ronaldo Luís Nazário de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+             *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' },
+             *         { 'ID': 4, 'Name': 'Manuel Neuer', 'PlaceOfBirth': 'Gelsenkirchen, West Germany' },
+             *         { 'ID': 5, 'Name': 'James Rodríguez', 'PlaceOfBirth': 'Cúcuta, Colombia' },
+             *         { 'ID': 6, 'Name': 'Dimitar Berbatov', 'PlaceOfBirth': 'Blagoevgrad, Bulgaria' }
+             *     ];
+             *     editManager = function (value, record, $cell, $displayEl, id, $grid) {
+             *         var data = $grid.data(),
+             *             $edit = $('<button class="gj-button-md"><i class="material-icons">mode_edit</i> Edit</button>').attr('data-key', id),
+             *             $delete = $('<button class="gj-button-md"><i class="material-icons">delete</i> Delete</button>').attr('data-key', id),
+             *             $update = $('<button class="gj-button-md"><i class="material-icons">check_circle</i> Update</button>').attr('data-key', id).hide(),
+             *             $cancel = $('<button class="gj-button-md"><i class="material-icons">cancel</i> Cancel</button>').attr('data-key', id).hide();
+             *         $edit.on('click', function (e) {
+             *             $grid.edit($(this).data('key'));
+             *             $edit.hide();
+             *             $delete.hide();
+             *             $update.show();
+             *             $cancel.show();
+             *         });
+             *         $delete.on('click', function (e) {
+             *             $grid.removeRow($(this).data('key'));
+             *         });
+             *         $update.on('click', function (e) {
+             *             $grid.update($(this).data('key'));
+             *             $edit.show();
+             *             $delete.show();
+             *             $update.hide();
+             *             $cancel.hide();
+             *         });
+             *         $cancel.on('click', function (e) {
+             *             $grid.cancel($(this).data('key'));
+             *             $edit.show();
+             *             $delete.show();
+             *             $update.hide();
+             *             $cancel.hide();
+             *         });
+             *         $displayEl.empty().append($edit).append($delete).append($update).append($cancel);
+             *     }
+             *     grid = $('#grid').grid({
+             *         dataSource: data,
+             *         primaryKey: 'ID',
+             *         inlineEditing: { mode: 'command', managementColumn: false },
+             *         columns: [
+             *             { field: 'ID', width: 56 },
+             *             { field: 'Name', editor: true },
+             *             { field: 'PlaceOfBirth', editor: true },
+             *             { width: 300, align: 'center', renderer: editManager }
+             *         ]
+             *     });
+             * </script>
+             * @example Bootstrap <!-- bootstrap, grid, dropdown -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid, data = [
+             *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+             *         { 'ID': 2, 'Name': 'Ronaldo Luís Nazário de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+             *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' },
+             *         { 'ID': 4, 'Name': 'Manuel Neuer', 'PlaceOfBirth': 'Gelsenkirchen, West Germany' },
+             *         { 'ID': 5, 'Name': 'James Rodríguez', 'PlaceOfBirth': 'Cúcuta, Colombia' },
+             *         { 'ID': 6, 'Name': 'Dimitar Berbatov', 'PlaceOfBirth': 'Blagoevgrad, Bulgaria' }
+             *     ];
+             *     grid = $('#grid').grid({
+             *         dataSource: data,
+             *         primaryKey: 'ID',
+             *         inlineEditing: { mode: 'command' },
+             *         uiLibrary: 'bootstrap',
+             *         columns: [
+             *             { field: 'ID', width: 34 },
+             *             { field: 'Name', editor: true },
+             *             { field: 'PlaceOfBirth', editor: true }
+             *         ],
+             *         pager: { limit: 3, sizes: [3, 5, 10, 20] }
+             *     });
+             * </script>
+             * @example Bootstrap.4 <!-- bootstrap4, grid, dropdown -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid, data = [
+             *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+             *         { 'ID': 2, 'Name': 'Ronaldo Luís Nazário de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+             *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' },
+             *         { 'ID': 4, 'Name': 'Manuel Neuer', 'PlaceOfBirth': 'Gelsenkirchen, West Germany' },
+             *         { 'ID': 5, 'Name': 'James Rodríguez', 'PlaceOfBirth': 'Cúcuta, Colombia' },
+             *         { 'ID': 6, 'Name': 'Dimitar Berbatov', 'PlaceOfBirth': 'Blagoevgrad, Bulgaria' }
+             *     ];
+             *     grid = $('#grid').grid({
+             *         dataSource: data,
+             *         primaryKey: 'ID',
+             *         inlineEditing: { mode: 'command' },
+             *         uiLibrary: 'bootstrap4',
+             *         columns: [
+             *             { field: 'ID', width: 42 },
+             *             { field: 'Name', editor: true },
+             *             { field: 'PlaceOfBirth', editor: true }
+             *         ],
+             *         pager: { limit: 3, sizes: [3, 5, 10, 20] }
+             *     });
+             * </script>
+            */
+            managementColumn: true,
 
             managementColumnConfig: { width: 300, role: 'managementColumn', align: 'center', renderer: gj.grid.plugins.inlineEditing.renderers.editManager, cssClass: 'gj-grid-management-column' }
         }
@@ -1934,12 +4289,67 @@ gj.grid.plugins.inlineEditing.private = {
 
 gj.grid.plugins.inlineEditing.public = {
     /**
-     * Return array with all changes     */    getChanges: function () {
+     * Return array with all changes
+     * @method
+     * @return array
+     * @example sample <!-- grid, grid.inlineEditing -->
+     * <button id="btnGetChanges" class="gj-button-md">Get Changes</button>
+     * <br/><br/>
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         primaryKey: 'ID',
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID' }, { field: 'Name', editor: true }, { field: 'PlaceOfBirth', editor: true } ]
+     *     });
+     *     $('#btnGetChanges').on('click', function () {
+     *         alert(JSON.stringify(grid.getChanges()));
+     *     });
+     * </script>
+     */
+    getChanges: function () {
         return JSON.parse(sessionStorage.getItem('gj.grid.' + this.data().guid));
     },
 
     /**
-     * Enable edit mode for all editable cells within a row.     */    edit: function (id) {
+     * Enable edit mode for all editable cells within a row.
+     * @method
+     * @param {string} id - The id of the row that needs to be edited
+     * @return grid
+     * @example Edit.Row <!-- grid -->
+     * <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+     * <table id="grid"></table>
+     * <script>
+     *     var grid, renderer;
+     *     renderer = function (value, record, $cell, $displayEl, id) {
+     *         var $editBtn = $('<i class="fa fa-pencil gj-cursor-pointer" data-key="' + id + '"></i>'),
+     *             $updateBtn = $('<i class="fa fa-save gj-cursor-pointer" data-key="' + id + '"></i>').hide();
+     *         $editBtn.on('click', function (e) {
+     *             grid.edit($(this).data('key'));
+     *             $editBtn.hide();
+     *             $updateBtn.show();
+     *         });
+     *         $updateBtn.on('click', function (e) {
+     *             grid.update($(this).data('key'));
+     *             $editBtn.show();
+     *             $updateBtn.hide();
+     *         });
+     *         $displayEl.append($editBtn).append($updateBtn);
+     *     }
+     *     grid = $('#grid').grid({
+     *         primaryKey: 'ID',
+     *         dataSource: '/Players/Get',
+     *         inlineEditing: { mode: 'command', managementColumn: false },
+     *         columns: [ 
+     *             { field: 'ID', width: 56 },
+     *             { field: 'Name', editor: true }, 
+     *             { field: 'PlaceOfBirth', editor: true },
+     *             { width: 56, align: 'center', renderer: renderer }
+     *         ]
+     *     });
+     * </script>
+     */
+    edit: function (id) {
         var i, record = this.getById(id),
             $cells = gj.grid.methods.getRowById(this, id).children('td'),
             columns = this.data('columns');
@@ -1952,7 +4362,45 @@ gj.grid.plugins.inlineEditing.public = {
     },
 
     /**
-     * Update all editable cells within a row, when the row is in edit mode.     */    update: function (id) {
+     * Update all editable cells within a row, when the row is in edit mode.
+     * @method
+     * @param {string} id - The id of the row that needs to be updated
+     * @return grid
+     * @fires rowDataChanged
+     * @example Update.Row <!-- grid -->
+     * <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+     * <table id="grid"></table>
+     * <script>
+     *     var grid, renderer;
+     *     renderer = function (value, record, $cell, $displayEl, id) {
+     *         var $editBtn = $('<i class="fa fa-pencil gj-cursor-pointer" data-key="' + id + '"></i>'),
+     *             $updateBtn = $('<i class="fa fa-save gj-cursor-pointer" data-key="' + id + '"></i>').hide();
+     *         $editBtn.on('click', function (e) {
+     *             grid.edit($(this).data('key'));
+     *             $editBtn.hide();
+     *             $updateBtn.show();
+     *         });
+     *         $updateBtn.on('click', function (e) {
+     *             grid.update($(this).data('key'));
+     *             $editBtn.show();
+     *             $updateBtn.hide();
+     *         });
+     *         $displayEl.append($editBtn).append($updateBtn);
+     *     }
+     *     grid = $('#grid').grid({
+     *         primaryKey: 'ID',
+     *         dataSource: '/Players/Get',
+     *         inlineEditing: { mode: 'command', managementColumn: false },
+     *         columns: [ 
+     *             { field: 'ID', width: 56 },
+     *             { field: 'Name', editor: true }, 
+     *             { field: 'PlaceOfBirth', editor: true },
+     *             { width: 56, align: 'center', renderer: renderer }
+     *         ]
+     *     });
+     * </script>
+     */
+    update: function (id) {
         var i, record = this.getById(id),
             $cells = gj.grid.methods.getRowById(this, id).children('td'),
             columns = this.data('columns');
@@ -1967,7 +4415,44 @@ gj.grid.plugins.inlineEditing.public = {
     },
 
     /**
-     * Cancel the edition of all editable cells, when the row is in edit mode.     */    cancel: function (id) {
+     * Cancel the edition of all editable cells, when the row is in edit mode.
+     * @method
+     * @param {string} id - The id of the row where you need to undo all changes
+     * @return grid
+     * @example Cancel.Row <!-- grid -->
+     * <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+     * <table id="grid"></table>
+     * <script>
+     *     var grid, renderer;
+     *     renderer = function (value, record, $cell, $displayEl, id) {
+     *         var $editBtn = $('<i class="fa fa-pencil gj-cursor-pointer" data-key="' + id + '"></i>'),
+     *             $cancelBtn = $('<i class="fa fa-undo gj-cursor-pointer" data-key="' + id + '"></i>').hide();
+     *         $editBtn.on('click', function (e) {
+     *             grid.edit($(this).data('key'));
+     *             $editBtn.hide();
+     *             $cancelBtn.show();
+     *         });
+     *         $cancelBtn.on('click', function (e) {
+     *             grid.cancel($(this).data('key'));
+     *             $editBtn.show();
+     *             $cancelBtn.hide();
+     *         });
+     *         $displayEl.append($editBtn).append($cancelBtn);
+     *     }
+     *     grid = $('#grid').grid({
+     *         primaryKey: 'ID',
+     *         dataSource: '/Players/Get',
+     *         inlineEditing: { mode: 'command', managementColumn: false },
+     *         columns: [ 
+     *             { field: 'ID', width: 56 },
+     *             { field: 'Name', editor: true }, 
+     *             { field: 'PlaceOfBirth', editor: true },
+     *             { width: 56, align: 'center', renderer: renderer }
+     *         ]
+     *     });
+     * </script>
+     */
+    cancel: function (id) {
         var i, record = this.getById(id),
             $cells = gj.grid.methods.getRowById(this, id).children('td'),
             columns = this.data('columns');
@@ -1983,13 +4468,51 @@ gj.grid.plugins.inlineEditing.public = {
 gj.grid.plugins.inlineEditing.events = {
     /**
      * Event fires after inline edit of a cell in the grid.
-     *     */    cellDataChanged: function ($grid, $cell, column, record, oldValue, newValue) {
+     *
+     * @event cellDataChanged
+     * @param {object} e - event data
+     * @param {object} $cell - the cell presented as jquery object 
+     * @param {object} column - the column configuration data
+     * @param {object} record - the data of the row record
+     * @param {object} newValue - the new cell value
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         dataSource: '/Players/Get',
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name', editor: true }, { field: 'PlaceOfBirth', editor: true } ]
+     *     });
+     *     grid.on('cellDataChanged', function (e, $cell, column, record, newValue) {
+     *         alert('The value for "' + column.field + '" is changed to "' + newValue + '"');
+     *     });
+     * </script>
+     */
+    cellDataChanged: function ($grid, $cell, column, record, oldValue, newValue) {
         $grid.triggerHandler('cellDataChanged', [$cell, column, record, oldValue, newValue]);
     },
 
     /**
      * Event fires after inline edit of a row in the grid.
-     *     */    rowDataChanged: function ($grid, id, record) {
+     *
+     * @event rowDataChanged
+     * @param {object} e - event data
+     * @param {object} id - the id of the record
+     * @param {object} record - the data of the row record
+     * @example sample <!-- grid -->
+     * <table id="grid"></table>
+     * <script>
+     *     var grid = $('#grid').grid({
+     *         primaryKey: 'ID',
+     *         dataSource: '/Players/Get',
+     *         inlineEditing: { mode: 'command' },
+     *         columns: [ { field: 'ID', width: 56 }, { field: 'Name', editor: true }, { field: 'PlaceOfBirth', editor: true } ]
+     *     });
+     *     grid.on('rowDataChanged', function (e, id, record) {
+     *         alert('Record with id="' + id + '" is changed to "' + JSON.stringify(record) + '"');
+     *     });
+     * </script>
+     */
+    rowDataChanged: function ($grid, id, record) {
         $grid.triggerHandler('rowDataChanged', [id, record]);
     }
 };
@@ -2025,14 +4548,58 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     }
 };
 
-/**  */gj.grid.plugins.optimisticPersistence = {
+/** 
+ * @widget Grid 
+ * @plugin Optimistic Persistence
+ */
+gj.grid.plugins.optimisticPersistence = {
 
     config: {
         base: {
             optimisticPersistence: {
-                /** Array that contains a list with param names that needs to be saved in the localStorage. You need to specify guid on the initialization of the grid in order to enable this feature.                 */                localStorage: undefined,
+                /** Array that contains a list with param names that needs to be saved in the localStorage. You need to specify guid on the initialization of the grid in order to enable this feature.
+                 * @additionalinfo This feature is using <a href="https://developer.mozilla.org/en/docs/Web/API/Window/localStorage" target="_blank">HTML5 localStorage</a> to store params and values.
+                 * You can clear the data saved in localStorage when you clear your browser cache.
+                 * @alias optimisticPersistence.localStorage
+                 * @type array
+                 * @default undefined
+                 * @example sample <!-- bootstrap, grid  -->
+                 * <p>Change the page and/or page size and then refresh the grid.</p>
+                 * <table id="grid"></table>
+                 * <script>
+                 *     var grid = $('#grid').grid({
+                 *         guid: '58d47231-ac7b-e6d2-ddba-5e0195b31f2e',
+                 *         uiLibrary: 'bootstrap',
+                 *         dataSource: '/Players/Get',
+                 *         columns: [ { field: 'ID', width: 36 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+                 *         optimisticPersistence: { localStorage: ["page", "limit"] },
+                 *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+                 *     });
+                 * </script>
+                 */
+                localStorage: undefined,
 
-                /** Array that contains a list with param names that needs to be saved in the sessionStorage. You need to specify guid on the initialization of the grid in order to enable this feature.                 */                sessionStorage: undefined
+                /** Array that contains a list with param names that needs to be saved in the sessionStorage. You need to specify guid on the initialization of the grid in order to enable this feature.
+                 * @additionalinfo This feature is using <a href="https://developer.mozilla.org/en/docs/Web/API/Window/sessionStorage" target="_blank">HTML5 sessionStorage</a> to store params and values.
+                 * You can clear the data saved in sessionStorage when you open and close the browser.
+                 * @alias optimisticPersistence.sessionStorage
+                 * @type array
+                 * @default undefined
+                 * @example sample <!-- bootstrap, grid  -->
+                 * <p>Change the page and/or page size and then refresh the grid. </p>
+                 * <table id="grid"></table>
+                 * <script>
+                 *     var grid = $('#grid').grid({
+                 *         guid: '58d47231-ac7b-e6d2-ddba-5e0195b31f2f',
+                 *         uiLibrary: 'bootstrap',
+                 *         dataSource: '/Players/Get',
+                 *         columns: [ { field: 'ID', width: 36 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+                 *         optimisticPersistence: { sessionStorage: ["page", "limit"] },
+                 *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+                 *     });
+                 * </script>
+                 */
+                sessionStorage: undefined
             }
         }
     },
@@ -2089,7 +4656,11 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
         }
     }
 };
-/** */gj.grid.plugins.pagination = {
+/**
+ * @widget Grid
+ * @plugin Pagination
+ */
+gj.grid.plugins.pagination = {
     config: {
         base: {
             style: {
@@ -2102,21 +4673,157 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
 
             paramNames: {
                 /** The name of the parameter that is going to send the number of the page.
-                 * The pager should be enabled in order this parameter to be in use.                 */                page: 'page',
+                 * The pager should be enabled in order this parameter to be in use.
+                 * @alias paramNames.page
+                 * @type string
+                 * @default "page"
+                 */
+                page: 'page',
 
                 /** The name of the parameter that is going to send the maximum number of records per page.
-                 * The pager should be enabled in order this parameter to be in use.                 */                limit: 'limit'
+                 * The pager should be enabled in order this parameter to be in use.
+                 * @alias paramNames.limit
+                 * @type string
+                 * @default "limit"
+                 */
+                limit: 'limit'
             },
 
             pager: {
-                /** The maximum number of records that can be show by page.                 */                limit: 10,
+                /** The maximum number of records that can be show by page.
+                 * @alias pager.limit
+                 * @type number
+                 * @default 10
+                 * @example local.data <!-- grid, dropdown -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     var data, grid;
+                 *     data = [
+                 *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+                 *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+                 *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+                 *     ];
+                 *     grid = $('#grid').grid({
+                 *         dataSource: data,
+                 *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+                 *         pager: { limit: 2, sizes: [2, 5, 10, 100] }
+                 *     });
+                 * </script>
+                 * @example remote.data <!-- grid, dropdown -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     var grid = $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+                 *         pager: { limit: 2, sizes: [2, 5, 10, 100] }
+                 *     });
+                 * </script>
+                 */
+                limit: 10,
 
                 /** Array that contains the possible page sizes of the grid.
-                 * When this setting is set, then a drop down with the options for each page size is visualized in the pager.                 */                sizes: [5, 10, 20, 100],
+                 * When this setting is set, then a drop down with the options for each page size is visualized in the pager.
+                 * @alias pager.sizes
+                 * @type array
+                 * @default [5, 10, 20, 100]
+                 * @example Bootstrap.3 <!-- bootstrap, grid, grid.pagination, dropdown  -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     var grid = $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         uiLibrary: 'bootstrap',
+                 *         columns: [ { field: 'ID', width: 36 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+                 *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+                 *     });
+                 * </script>
+                 * @example Bootstrap.4.FontAwesome <!-- bootstrap4, fontawesome, grid, dropdown  -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     var grid = $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         uiLibrary: 'bootstrap4',
+                 *         iconsLibrary: 'fontawesome',
+                 *         columns: [ { field: 'ID', width: 36 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+                 *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+                 *     });
+                 * </script>
+                 * @example Bootstrap.4.Material.Icons <!-- bootstrap4, grid, dropdown  -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     var grid = $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         uiLibrary: 'bootstrap4',
+                 *         columns: [ { field: 'ID', width: 36 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+                 *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+                 *     });
+                 * </script>
+                 * @example Material.Design <!-- grid, grid.pagination, dropdown  -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     var grid = $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         uiLibrary: 'materialdesign',
+                 *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+                 *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+                 *     });
+                 * </script>
+                 */
+                sizes: [5, 10, 20, 100],
 
-                /** Array that contains a list with jquery objects that are going to be used on the left side of the pager.                 */                leftControls: undefined,
+                /** Array that contains a list with jquery objects that are going to be used on the left side of the pager.
+                 * @alias pager.leftControls
+                 * @type array
+                 * @default array
+                 * @example Font.Awesome <!-- fontawesome, grid  -->
+                 * <style>
+                 * .icon-disabled { color: #ccc; }
+                 * table.gj-grid div[data-role="display"] div.custom-item { display: table; margin-right: 5px; }
+                 * </style>
+                 * <table id="grid"></table>
+                 * <script>
+                 *     var grid = $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+                 *         style: {
+                 *             pager: {
+                 *                 stateDisabled: 'icon-disabled'
+                 *             }
+                 *         },
+                 *         pager: { 
+                 *             limit: 2, 
+                 *             sizes: [2, 5, 10, 20],
+                 *             leftControls: [
+                 *                 $('<div title="First" data-role="page-first" class="custom-item"><i class="fa fa-fast-backward" aria-hidden="true" /></div>'),
+                 *                 $('<div title="Previous" data-role="page-previous" class="custom-item"><i class="fa fa-backward" aria-hidden="true" /></div>'),
+                 *                 $('<div> Page </div>'),
+                 *                 $('<div class="custom-item"></div>').append($('<input type="text" data-role="page-number" style="margin: 0 5px; width: 34px; height: 16px; text-align: right;" value="0">')),
+                 *                 $('<div>of&nbsp;</div>'),
+                 *                 $('<div data-role="page-label-last" style="margin-right: 5px;">0</div>'),
+                 *                 $('<div title="Next" data-role="page-next" class="custom-item"><i class="fa fa-forward" aria-hidden="true" /></div>'),
+                 *                 $('<div title="Last" data-role="page-last" class="custom-item"><i class="fa fa-fast-forward" aria-hidden="true" /></div>'),
+                 *                 $('<div title="Reload" data-role="page-refresh" class="custom-item"><i class="fa fa-refresh" aria-hidden="true" /></div>'),
+                 *                 $('<div class="custom-item"></div>').append($('<select data-role="page-size" style="margin: 0 5px; width: 50px;"></select>'))
+                 *             ],
+                 *             rightControls: [
+                 *                 $('<div>Displaying records&nbsp;</div>'),
+                 *                 $('<div data-role="record-first">0</div>'),
+                 *                 $('<div>&nbsp;-&nbsp;</div>'),
+                 *                 $('<div data-role="record-last">0</div>'),
+                 *                 $('<div>&nbsp;of&nbsp;</div>'),
+                 *                 $('<div data-role="record-total">0</div>').css({ "margin-right": "5px" })
+                 *             ]
+                 *         }
+                 *     });
+                 * </script>
+                 */
+                leftControls: undefined,
 
-                /** Array that contains a list with jquery objects that are going to be used on the right side of the pager.                 */                rightControls: undefined
+                /** Array that contains a list with jquery objects that are going to be used on the right side of the pager.
+                 * @alias pager.rightControls
+                 * @type array
+                 * @default array
+                 */
+                rightControls: undefined
             }
         },
 
@@ -2494,13 +5201,55 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     events: {
         /**
          * Triggered when the page size is changed.
-         *         */        pageSizeChange: function ($grid, newSize) {
+         *
+         * @event pageSizeChange
+         * @param {object} e - event data
+         * @param {number} newSize - The new page size
+         * @example sample <!-- bootstrap, grid, grid.pagination -->
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         uiLibrary: 'bootstrap',
+         *         columns: [ { field: 'ID', width: 36 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+         *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+         *     });
+         *     grid.on('pageSizeChange', function (e, newSize) {
+         *         alert('The new page size is ' + newSize + '.');
+         *     });
+         * </script>
+         */
+        pageSizeChange: function ($grid, newSize) {
             $grid.triggerHandler('pageSizeChange', [newSize]);
         },
 
         /**
          * Triggered before the change of the page.
-         *         */        pageChanging: function ($grid, newSize) {
+         *
+         * @event pageChanging
+         * @param {object} e - event data
+         * @param {number} newPage - The new page
+         * @example sample <!-- bootstrap4, fontawesome, dropdown, grid, grid.pagination -->
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         uiLibrary: 'bootstrap4',
+         *         iconsLibrary: 'fontawesome',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ],
+         *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+         *     });
+         *     grid.on('pageChanging', function (e, newPage) {
+         *         if (isNaN(newPage)) {
+         *             alert('Invalid page number');
+         *             return false;
+         *         } else {
+         *             alert(newPage + ' is valid page number.');
+         *         }
+         *     });
+         * </script>
+         */
+        pageChanging: function ($grid, newSize) {
             $grid.triggerHandler('pageChanging', [newSize]);
         }
     },
@@ -2527,28 +5276,146 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     }
 };
 
-/**  */gj.grid.plugins.responsiveDesign = {
+/** 
+ * @widget Grid 
+ * @plugin Responsive Design
+ */
+gj.grid.plugins.responsiveDesign = {
     config: {
         base: {
             /** The interval in milliseconds for checking if the grid is resizing.
-             * This setting is in use only if the resizeMonitoring setting is set to true.             */            resizeCheckInterval: 500,
+             * This setting is in use only if the resizeMonitoring setting is set to true.
+             * @type number
+             * @default 500
+             * @example sample <!-- grid, grid.responsiveDesign -->
+             * <p>Change browser window size in order to fire resize event.</p>
+             * <table id="grid"></table>
+             * <script>
+             *     var grid = $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         responsive: true,
+             *         resizeCheckInterval: 2000, //check if the grid is resized on each 2 second
+             *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             *     grid.on('resize', function () {
+             *         alert('resize is fired.');
+             *     });
+             * </script>
+             */
+            resizeCheckInterval: 500,
 
             /** This setting enables responsive behaviour of the grid where some column are invisible when there is not enough space on the screen for them.
              * The visibility of the columns in this mode is driven by the column minWidth and priority settings.
-             * The columns without priority setting are always visible and can't hide in small screen resolutions.             */            responsive: false,
+             * The columns without priority setting are always visible and can't hide in small screen resolutions.
+             * @type boolean
+             * @default false
+             * @example sample <!-- grid, grid.responsiveDesign -->
+             * <p>Resize browser window in order to see his responsive behaviour.</p>
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         responsive: true,
+             *         columns: [
+             *             { field: 'Name' },
+             *             { field: 'PlaceOfBirth', minWidth: 340, priority: 1 },
+             *             { field: 'DateOfBirth', minWidth: 360, priority: 2, type: 'date' }
+             *         ]
+             *     });
+             * </script>
+             */
+            responsive: false,
 
             /** Automatically adds hidden columns to the details section of the row.
              * This setting works only if the responsive setting is set to true and the detailTemplate is set.
-             * You need to set priority and minWidth on the colums, that needs to be hidden in smaller screens.             */            showHiddenColumnsAsDetails: false,
+             * You need to set priority and minWidth on the colums, that needs to be hidden in smaller screens.
+             * @type boolean
+             * @default false
+             * @example Remote.Data.Source <!-- bootstrap, grid, grid.expandCollapseRows, grid.responsiveDesign -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         detailTemplate: '<div class="row"></div>',
+             *         responsive: true,
+             *         showHiddenColumnsAsDetails: true,
+             *         uiLibrary: 'bootstrap',
+             *         columns: [
+             *             { field: 'ID', width: 34 },
+             *             { field: 'Name', minWidth: 320, priority: 1 },
+             *             { field: 'PlaceOfBirth', minWidth: 320, priority: 2 }
+             *         ]
+             *     });
+             * </script>
+             * @example Local.Data.Source <!-- bootstrap, grid, grid.expandCollapseRows, grid.responsiveDesign -->
+             * <table id="grid"></table>
+             * <script>             
+             *     var data = [
+             *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+             *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+             *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+             *     ];
+             *     $('#grid').grid({
+             *         dataSource: data,
+             *         detailTemplate: '<div class="row"></div>',
+             *         responsive: true,
+             *         showHiddenColumnsAsDetails: true,
+             *         uiLibrary: 'bootstrap',
+             *         columns: [
+             *             { field: 'ID', width: 34 },
+             *             { field: 'Name', minWidth: 320, priority: 1 },
+             *             { field: 'PlaceOfBirth', minWidth: 320, priority: 2 }
+             *         ],
+             *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+             *     });
+             * </script>
+             */
+            showHiddenColumnsAsDetails: false,
 
             defaultColumn: {
                 /** The priority of the column compared to other columns in the grid.
                  * The columns are hiding based on the priorities.
-                 * This setting is working only when the responsive setting is set to true.                 */                priority: undefined,
+                 * This setting is working only when the responsive setting is set to true.
+                 * @alias column.priority
+                 * @type number
+                 * @default undefined
+                 * @example sample <!-- grid, grid.responsiveDesign -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         responsive: true,
+                 *         columns: [
+                 *             { field: 'Name' },
+                 *             { field: 'PlaceOfBirth', priority: 1 },
+                 *             { field: 'DateOfBirth', priority: 2, type: 'date' }
+                 *         ]
+                 *     });
+                 * </script>
+                 */
+                priority: undefined,
 
                 /** The minimum width of the column.
                  * The column is getting invisible when there is not enough space in the grid for this minimum width.
-                 * This setting is working only when the responsive setting is set to true and the column priority setting is set.                 */                minWidth: 250
+                 * This setting is working only when the responsive setting is set to true and the column priority setting is set.
+                 * @alias column.minWidth
+                 * @type number
+                 * @default 250
+                 * @example sample <!-- grid, grid.responsiveDesign -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         responsive: true,
+                 *         columns: [
+                 *             { field: 'Name' },
+                 *             { field: 'PlaceOfBirth', minWidth: 240, priority: 1 },
+                 *             { field: 'DateOfBirth', minWidth: 260, priority: 2, type: 'date' }
+                 *         ]
+                 *     });
+                 * </script>
+                 */
+                minWidth: 250
             },
             style: {
                 rowDetailItem: ''
@@ -2627,7 +5494,26 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
 
         /**
          * Make the grid responsive based on the available space.
-         * Show column if the space for the grid is expanding and hide columns when the space for the grid is decreasing.         */        makeResponsive: function () {
+         * Show column if the space for the grid is expanding and hide columns when the space for the grid is decreasing.
+         * @method
+         * @return grid object
+         * @example sample <!-- grid -->
+         * <button onclick="grid.makeResponsive()" class="gj-button-md">Make Responsive</button>
+         * <br/><br/>
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         responsive: false,
+         *         columns: [
+         *             { field: 'ID', width: 56 },
+         *             { field: 'Name', minWidth: 320, priority: 1 },
+         *             { field: 'PlaceOfBirth', minWidth: 320, priority: 2 }
+         *         ]
+         *     });
+         * </script>
+         */
+        makeResponsive: function () {
             var i, $column,
                 extraWidth = 0,
                 config = this.data(),
@@ -2664,7 +5550,25 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     'events': {
         /**
          * Event fires when the grid width is changed. The "responsive" configuration setting should be set to true in order this event to fire.
-         *         */        resize: function ($grid, newWidth, oldWidth) {
+         *
+         * @event resize
+         * @param {object} e - event data
+         * @param {number} newWidth - The new width
+         * @param {number} oldWidth - The old width
+         * @example sample <!-- grid, grid.responsiveDesign -->
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         responsive: true,
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         *     grid.on('resize', function (e, newWidth, oldWidth) {
+         *         alert('resize is fired.');
+         *     });
+         * </script>
+         */
+        resize: function ($grid, newWidth, oldWidth) {
             $grid.triggerHandler('resize', [newWidth, oldWidth]);
         }
     },
@@ -2709,12 +5613,64 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     }
 };
 
-/**  */gj.grid.plugins.toolbar = {
+/** 
+ * @widget Grid 
+ * @plugin Toolbar
+ */
+gj.grid.plugins.toolbar = {
     config: {
         base: {
-            /** Template for the content in the toolbar. Appears in a separate row on top of the grid.              */            toolbarTemplate: undefined,
+            /** Template for the content in the toolbar. Appears in a separate row on top of the grid.
+              * @type string
+              * @default undefined
+              * @example sample <!-- bootstrap, grid, grid.toolbar, grid.pagination -->
+              * <table id="grid"></table>
+              * <script>
+              *     var grid = $('#grid').grid({
+              *         dataSource: '/Players/Get',
+              *         uiLibrary: 'bootstrap',
+              *         toolbarTemplate: '<div class="row"><div class="col-xs-8" style="line-height:34px"><span data-role="title">Grid Title</span></div><div class="col-xs-4 text-right"><button onclick="grid.reload()" class="btn btn-default">click here to refresh</button></div></div>',
+              *         columns: [ { field: 'ID', width: 34 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+              *         pager: { limit: 5 }
+              *     });
+              * </script>
+              */
+            toolbarTemplate: undefined,
 
-            /** The title of the grid. Appears in a separate row on top of the grid.              */            title: undefined,
+            /** The title of the grid. Appears in a separate row on top of the grid.
+              * @type string
+              * @default undefined
+              * @example Material.Design <!-- grid, grid.toolbar -->
+              * <table id="grid"></table>
+              * <script>
+              *     $('#grid').grid({
+              *         dataSource: '/Players/Get',
+              *         title: 'Players',
+              *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+              *     });
+              * </script>
+              * @example Bootstrap.3 <!-- bootstrap, grid, grid.toolbar -->
+              * <table id="grid"></table>
+              * <script>
+              *     $('#grid').grid({
+              *         dataSource: '/Players/Get',
+              *         uiLibrary: 'bootstrap',
+              *         title: 'Players',
+              *         columns: [ { field: 'ID', width: 34 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+              *     });
+              * </script>
+              * @example Bootstrap.4 <!-- bootstrap4, grid, grid.toolbar -->
+              * <table id="grid"></table>
+              * <script>
+              *     $('#grid').grid({
+              *         dataSource: '/Players/Get',
+              *         uiLibrary: 'bootstrap4',
+              *         title: 'Players',
+              *         columns: [ { field: 'ID', width: 34 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+              *     });
+              * </script>
+              */
+            title: undefined,
 
             style: {
                 toolbar: 'gj-grid-md-toolbar'
@@ -2768,7 +5724,39 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
 
     public: {        
         /**
-         * Get or set grid title.         */        title: function (text) {
+         * Get or set grid title.
+         * @additionalinfo When you pass value in the text parameter this value with be in use for the new title of the grid and the method will return grid object.<br/>
+         * When you don't pass value in the text parameter, then the method will return the text of the current grid title.<br/>
+         * You can use this method in a combination with toolbarTemplate only if the title is wrapped in element with data-role attribute that equals to "title".<br/>
+         * @method
+         * @param {object} text - The text of the new grid title.
+         * @return string or grid object
+         * @example text <!-- grid, grid.toolbar -->
+         * <button onclick="grid.title('New Title')" class="gj-button-md">Set New Title</button>
+         * <button onclick="alert(grid.title())" class="gj-button-md">Get Title</button>
+         * <br/><br/>
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         title: 'Initial Grid Title',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         * @example html.template <!-- grid, grid.toolbar -->
+         * <button onclick="grid.title('New Title')" class="gj-button-md">Set New Title</button>
+         * <button onclick="alert(grid.title())" class="gj-button-md">Get Title</button>
+         * <br/><br/>
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         toolbarTemplate: '<div data-role="title">Initial Grid Title</div>',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+         *     });
+         * </script>
+         */
+        title: function (text) {
             var $titleEl = this.parent().find('div[data-role="toolbar"] [data-role="title"]');
             if (typeof (text) !== 'undefined') {
                 $titleEl.text(text);
@@ -2790,10 +5778,58 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     }
 };
 
-/**  */gj.grid.plugins.resizableColumns = {
+/** 
+ * @widget Grid 
+ * @plugin Resizable Columns
+ */
+gj.grid.plugins.resizableColumns = {
     config: {
         base: {
-            /** If set to true, users can resize columns by dragging the edges (resize handles) of their header cells.             */            resizableColumns: false
+            /** If set to true, users can resize columns by dragging the edges (resize handles) of their header cells.
+             * @type boolean
+             * @default false
+             * @example Material.Design <!-- grid, draggable -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid = $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         resizableColumns: true,
+             *         columns: [ { field: 'ID', width: 56 }, { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             * @example Bootstrap <!-- bootstrap, grid, draggable -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid = $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         resizableColumns: true,
+             *         uiLibrary: 'bootstrap',
+             *         columns: [ { field: 'ID', width: 34 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             * @example Bootstrap.4 <!-- bootstrap4, grid, draggable -->
+             * <table id="grid"></table>
+             * <script>
+             *     var grid = $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         resizableColumns: true,
+             *         uiLibrary: 'bootstrap4',
+             *         columns: [ { field: 'ID', width: 42 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             * @example Bootstrap.4.FixedHeader <!-- bootstrap4, grid, draggable -->
+             * <table id="grid" width="900"></table>
+             * <script>
+             *     var grid = $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         resizableColumns: true,
+             *         fixedHeader: true,
+             *         uiLibrary: 'bootstrap4',
+             *         columns: [ { field: 'ID', width: 42 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             */
+            resizableColumns: false
         }
     },
 
@@ -2876,15 +5912,104 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     }
 };
 
-/**  */gj.grid.plugins.rowReorder = {
+/** 
+ * @widget Grid 
+ * @plugin Row Reorder
+ */
+gj.grid.plugins.rowReorder = {
     config: {
         base: {
-            /** If set to true, enable row reordering with drag and drop.             */            rowReorder: false,
+            /** If set to true, enable row reordering with drag and drop.
+             * @type boolean
+             * @default false
+             * @example Material.Design <!-- grid, grid.rowReorder, draggable, droppable -->
+             * <p>Drag and Drop rows in order to reorder them.</p>
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         rowReorder: true,
+             *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             * @example Bootstrap.3 <!-- bootstrap, grid, grid.rowReorder, draggable, droppable -->
+             * <p>Drag and Drop rows in order to reorder them.</p>
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         rowReorder: true,
+             *         uiLibrary: 'bootstrap',
+             *         columns: [ { field: 'ID', width: 36 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             * @example Bootstrap.4 <!-- bootstrap4, grid, grid.rowReorder, draggable, droppable -->
+             * <p>Drag and Drop rows in order to reorder them.</p>
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         rowReorder: true,
+             *         uiLibrary: 'bootstrap4',
+             *         columns: [ { field: 'ID', width: 42 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             */
+            rowReorder: false,
 
             /** If set, enable row reordering only when you try to drag cell from the configured column.
-             * Accept only field names of columns.             */            rowReorderColumn: undefined,
+             * Accept only field names of columns.
+             * @type string
+             * @default undefined
+             * @example sample <!-- grid, grid.rowReorder, draggable, droppable -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         rowReorder: true,
+             *         rowReorderColumn: 'ID',
+             *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             */
+            rowReorderColumn: undefined,
 
-            /** If set, update the value in the field for all records. Accept only field names of columns.             */            orderNumberField: undefined,
+            /** If set, update the value in the field for all records. Accept only field names of columns.
+             * @type string
+             * @default undefined
+             * @example Visible.OrderNumber <!-- grid, grid.rowReorder, draggable, droppable -->
+             * <table id="grid"></table>
+             * <script>
+             *     var data = [
+             *         { 'ID': 1, 'OrderNumber': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+             *         { 'ID': 2, 'OrderNumber': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+             *         { 'ID': 3, 'OrderNumber': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+             *     ];
+             *     $('#grid').grid({
+             *         dataSource: data,
+             *         rowReorder: true,
+             *         orderNumberField: 'OrderNumber',
+             *         columns: [ { field: 'ID', width: 56 }, { field: 'OrderNumber', width:120 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             * @example Hidden.OrderNumber <!-- grid, grid.rowReorder, draggable, droppable -->
+             * <button onclick="alert(JSON.stringify(grid.getAll()))" class="gj-button-md">Show Data</button><br/><br/>
+             * <table id="grid"></table>
+             * <script>
+             *     var data = [
+             *         { 'ID': 1, 'OrderNumber': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+             *         { 'ID': 2, 'OrderNumber': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+             *         { 'ID': 3, 'OrderNumber': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+             *     ],
+             *     grid = $('#grid').grid({
+             *         dataSource: data,
+             *         rowReorder: true,
+             *         orderNumberField: 'OrderNumber',
+             *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             */
+            orderNumberField: undefined,
 
             style: {
                 targetRowIndicatorTop: 'gj-grid-row-reorder-indicator-top',
@@ -3022,12 +6147,49 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     }
 };
 
-/**  */gj.grid.plugins.export = {
+/** 
+ * @widget Grid 
+ * @plugin Export
+ */
+gj.grid.plugins.export = {
     config: { base: {} },
 
     public: {
         /**
-         * Get grid data in Comma Separated Values (CSV) format.         */        getCSV: function (includeAllRecords) {
+         * Get grid data in Comma Separated Values (CSV) format.
+         * @method
+         * @param {boolean} includeAllRecords - include records that are not visible when you are using local dataSource.
+         * @return string
+         * @example Local.Data <!-- grid, dropdown -->
+         * <button onclick="alert(grid.getCSV(true))" class="gj-button-md">Get All</button>
+         * <br/><br/>
+         * <table id="grid"></table>
+         * <script>
+         *     var data, grid;
+         *     data = [
+         *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+         *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+         *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+         *     ];
+         *     grid = $('#grid').grid({
+         *         dataSource: data,
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+         *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+         *     });
+         * </script>
+         * @example Remote.Data <!-- grid, dropdown -->
+         * <button onclick="alert(grid.getCSV())" class="gj-button-md">Get CSV</button>
+         * <br/><br/>
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+         *         pager: { limit: 5 }
+         *     });
+         * </script>
+         */
+        getCSV: function (includeAllRecords) {
             var i, j, line = '', str = '',
                 columns = this.data().columns,
                 records = this.getAll(includeAllRecords);
@@ -3057,7 +6219,42 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
         },
 
         /**
-         * Download grid data in Comma Separated Values (CSV) format.         */        downloadCSV: function (filename, includeAllRecords) {
+         * Download grid data in Comma Separated Values (CSV) format.
+         * @method
+         * @param {string} filename - name of the generated file.
+         * @param {boolean} includeAllRecords - include records that are not visible when you are using local dataSource.
+         * @return grid object
+         * @example Local.Data <!-- grid, dropdown -->
+         * <button onclick="grid.downloadCSV()" class="gj-button-md">Download Only First Page</button>
+         * <button onclick="grid.downloadCSV('myfilename.csv', true)" class="gj-button-md">Download All Data</button>
+         * <br/><br/>
+         * <table id="grid"></table>
+         * <script>
+         *     var data, grid;
+         *     data = [
+         *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+         *         { 'ID': 2, 'Name': 'Ronaldo Luis Nazario de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+         *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' }
+         *     ];
+         *     grid = $('#grid').grid({
+         *         dataSource: data,
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+         *         pager: { limit: 2, sizes: [2, 5, 10, 20] }
+         *     });
+         * </script>
+         * @example Remote.Data <!-- grid, dropdown -->
+         * <button onclick="grid.downloadCSV('myfilename.csv')" class="gj-button-md">Download CSV</button>
+         * <br/><br/>
+         * <table id="grid"></table>
+         * <script>
+         *     var grid = $('#grid').grid({
+         *         dataSource: '/Players/Get',
+         *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ],
+         *         pager: { limit: 5 }
+         *     });
+         * </script>
+         */
+        downloadCSV: function (filename, includeAllRecords) {
             var link = document.createElement('a');
             document.body.appendChild(link);
             link.download = filename || 'griddata.csv'; 
@@ -3081,10 +6278,50 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     }
 };
 
-/**  */gj.grid.plugins.columnReorder = {
+/** 
+ * @widget Grid 
+ * @plugin Column Reorder
+ */
+gj.grid.plugins.columnReorder = {
     config: {
         base: {
-            /** If set to true, enable column reordering with drag and drop.             */            columnReorder: false,
+            /** If set to true, enable column reordering with drag and drop.
+             * @type boolean
+             * @default false
+             * @example Material.Design <!-- grid, draggable, droppable -->
+             * <p>Drag and Drop column headers in order to reorder the columns.</p>
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         columnReorder: true,
+             *         columns: [ { field: 'ID', width: 56 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             * @example Bootstrap <!-- bootstrap, grid, draggable, droppable -->
+             * <p>Drag and Drop column headers in order to reorder the columns.</p>
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap',
+             *         columnReorder: true,
+             *         columns: [ { field: 'ID', width: 36 }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             * @example Bootstrap.4 <!-- bootstrap4, grid, draggable, droppable -->
+             * <p>Drag and Drop column headers in order to reorder the columns.</p>
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         uiLibrary: 'bootstrap4',
+             *         columnReorder: true,
+             *         columns: [ { field: 'ID', width: 48 }, { field: 'Name', sortable: true }, { field: 'PlaceOfBirth', sortable: true } ]
+             *     });
+             * </script>
+             */
+            columnReorder: false,
 
             dragReady: false,
 
@@ -3234,15 +6471,113 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     }
 };
 
-/** */gj.grid.plugins.headerFilter = {
+/**
+ * @widget Grid
+ * @plugin Header Filter
+ */
+gj.grid.plugins.headerFilter = {
     config: {
         base: {
             defaultColumnSettings: {
-                /** Indicates if the column is sortable. If set to false the header filter is hidden.                 */                filterable: true
+                /** Indicates if the column is sortable. If set to false the header filter is hidden.
+                 * @alias column.filterable
+                 * @type boolean
+                 * @default true
+                 * @example Material.Design <!-- grid -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         headerFilter: true,
+                 *         columns: [
+                 *             { field: 'ID', width: 56, filterable: false },
+                 *             { field: 'Name', filterable: true },
+                 *             { field: 'PlaceOfBirth' }
+                 *         ]
+                 *     });
+                 * </script>
+                 * @example Bootstrap.3 <!-- bootstrap, grid -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         headerFilter: true,
+                 *         uiLibrary: 'bootstrap',
+                 *         columns: [
+                 *             { field: 'ID', width: 56, filterable: false },
+                 *             { field: 'Name', filterable: true },
+                 *             { field: 'PlaceOfBirth' }
+                 *         ]
+                 *     });
+                 * </script>
+                 */
+                filterable: true
             },
 
-            /** If set to true, add filters for each column             */            headerFilter: {
-                /** Type of the header filter                 */                type: 'onenterkeypress'
+            /** If set to true, add filters for each column
+             * @type boolean
+             * @default object
+             * @example Remote.DataSource <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     $('#grid').grid({
+             *         dataSource: '/Players/Get',
+             *         headerFilter: true,
+             *         columns: [ { field: 'ID', width: 56, filterable: false }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+             *     });
+             * </script>
+             * @example Local.DataSource <!-- grid -->
+             * <table id="grid"></table>
+             * <script>
+             *     var data = [
+             *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria' },
+             *         { 'ID': 2, 'Name': 'Ronaldo Luís Nazário de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil' },
+             *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England' },
+             *         { 'ID': 4, 'Name': 'Manuel Neuer', 'PlaceOfBirth': 'Gelsenkirchen, West Germany' },
+             *         { 'ID': 5, 'Name': 'James Rodríguez', 'PlaceOfBirth': 'Cúcuta, Colombia' },
+             *         { 'ID': 6, 'Name': 'Dimitar Berbatov', 'PlaceOfBirth': 'Blagoevgrad, Bulgaria' }
+             *     ];
+             *     $('#grid').grid({
+             *         dataSource: data,
+             *         headerFilter: true,
+             *         columns: [ 
+             *             { field: 'ID', width: 56, filterable: false }, 
+             *             { field: 'Name' }, 
+             *             { field: 'PlaceOfBirth' } 
+             *         ],
+             *         pager: { limit: 5 }
+             *     });
+             * </script>
+             */
+            headerFilter: {
+                /** Type of the header filter
+                 * @alias headerFilter.type
+                 * @type (onenterkeypress|onchange)
+                 * @default 'onenterkeypress'
+                 * @example OnEnterKeyPress <!-- grid -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         headerFilter: {
+                 *             type: 'onenterkeypress'
+                 *         },
+                 *         columns: [ { field: 'ID', width: 56, filterable: false }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+                 *     });
+                 * </script>
+                 * @example OnChange <!-- grid -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     $('#grid').grid({
+                 *         dataSource: '/Players/Get',
+                 *         headerFilter: {
+                 *             type: 'onchange'
+                 *         },
+                 *         columns: [ { field: 'ID', width: 56, filterable: false }, { field: 'Name' }, { field: 'PlaceOfBirth' } ]
+                 *     });
+                 * </script>
+                 */
+                type: 'onenterkeypress'
             }
         }
     },
@@ -3305,27 +6640,132 @@ gj.grid.plugins.inlineEditing.configure = function ($grid, fullConfig, clientCon
     }
 };
 
-/**  */gj.grid.plugins.grouping = {
+/** 
+ * @widget Grid 
+ * @plugin Grouping
+ */
+gj.grid.plugins.grouping = {
     config: {
         base: {
             paramNames: {
                 /** The name of the parameter that is going to send the name of the column for grouping.
-                 * The grouping should be enabled in order this parameter to be in use.                 */                groupBy: 'groupBy',
+                 * The grouping should be enabled in order this parameter to be in use.
+                 * @alias paramNames.groupBy
+                 * @type string
+                 * @default "groupBy"
+                 */
+                groupBy: 'groupBy',
 
                 /** The name of the parameter that is going to send the direction for grouping.
-                 * The grouping should be enabled in order this parameter to be in use.                 */                groupByDirection: 'groupByDirection'
+                 * The grouping should be enabled in order this parameter to be in use.
+                 * @alias paramNames.groupByDirection
+                 * @type string
+                 * @default "groupByDirection"
+                 */
+                groupByDirection: 'groupByDirection'
             },
 
             grouping: {
-                /** The name of the field that needs to be in use for grouping.                  */                groupBy: undefined,
+                /** The name of the field that needs to be in use for grouping.
+                  * @type string
+                  * @alias grouping.groupBy
+                  * @default undefined
+                  * @example Local.Data <!-- grid -->
+                  * <table id="grid"></table>
+                  * <script>
+                  *     var grid, data = [
+                  *         { 'ID': 1, 'Name': 'Hristo Stoichkov', 'PlaceOfBirth': 'Plovdiv, Bulgaria', CountryName: 'Bulgaria' },
+                  *         { 'ID': 2, 'Name': 'Ronaldo Luís Nazário de Lima', 'PlaceOfBirth': 'Rio de Janeiro, Brazil', CountryName: 'Brazil' },
+                  *         { 'ID': 3, 'Name': 'David Platt', 'PlaceOfBirth': 'Chadderton, Lancashire, England', CountryName: 'England' },
+                  *         { 'ID': 4, 'Name': 'Manuel Neuer', 'PlaceOfBirth': 'Gelsenkirchen, West Germany', CountryName: 'Germany' },
+                  *         { 'ID': 5, 'Name': 'James Rodríguez', 'PlaceOfBirth': 'Cúcuta, Colombia', CountryName: 'Colombia' },
+                  *         { 'ID': 6, 'Name': 'Dimitar Berbatov', 'PlaceOfBirth': 'Blagoevgrad, Bulgaria', CountryName: 'Bulgaria' }
+                  *     ];
+                  *     $('#grid').grid({
+                  *         dataSource: data,
+                  *         grouping: { groupBy: 'CountryName' },
+                  *         columns: [ { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ]
+                  *     });
+                  * </script>
+                  * @example Remote.Data <!-- grid -->
+                  * <table id="grid"></table>
+                  * <script>
+                  *     $('#grid').grid({
+                  *         dataSource: '/Players/Get',
+                  *         grouping: { groupBy: 'CountryName' },
+                  *         columns: [ { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ]
+                  *     });
+                  * </script>
+                  * @example Bootstrap.3 <!-- bootstrap, grid -->
+                  * <table id="grid"></table>
+                  * <script>
+                  *     $('#grid').grid({
+                  *         dataSource: '/Players/Get',
+                  *         uiLibrary: 'bootstrap',
+                  *         grouping: { groupBy: 'CountryName' },
+                  *         columns: [ { field: 'Name', sortable: true }, { field: 'DateOfBirth', type: 'date' } ]
+                  *         detailTemplate: '<div><b>Place Of Birth:</b> {PlaceOfBirth}</div>'
+                  *     });
+                  * </script>
+                  * @example Bootstrap.4 <!-- bootstrap4, fontawesome, grid -->
+                  * <table id="grid"></table>
+                  * <script>
+                  *     $('#grid').grid({
+                  *         dataSource: '/Players/Get',
+                  *         uiLibrary: 'bootstrap4',
+                  *         iconsLibrary: 'fontawesome',
+                  *         grouping: { groupBy: 'CountryName' },
+                  *         columns: [ { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ]
+                  *     });
+                  * </script>
+                  */
+                groupBy: undefined,
 
                 direction: 'asc'
             },
 
             icons: {
-                /** Expand row icon definition.                 */                expandGroup: '<i class="gj-icon plus" />',
+                /** Expand row icon definition.
+                 * @alias icons.expandGroup
+                 * @type String
+                 * @default '<i class="gj-icon plus" />'
+                 * @example Right.Down.Icons <!-- materialicons, grid -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     $('#grid').grid({
+                 *         primaryKey: 'ID',
+                 *         dataSource: '/Players/Get',
+                 *         columns: [ { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ],
+                 *         grouping: { groupBy: 'CountryName' },
+                 *         icons: {
+                 *             expandGroup: '<i class="material-icons">keyboard_arrow_right</i>',
+                 *             collapseGroup: '<i class="material-icons">keyboard_arrow_down</i>'
+                 *         }
+                 *     });
+                 * </script>
+                 */
+                expandGroup: '<i class="gj-icon plus" />',
 
-                /** Collapse row icon definition.                 */                collapseGroup: '<i class="gj-icon minus" />'
+                /** Collapse row icon definition.
+                 * @alias icons.collapseGroup
+                 * @type String
+                 * @default '<i class="gj-icon minus" />'
+                 * @example Right.Down.Icons <!-- materialicons, grid -->
+                 * <table id="grid"></table>
+                 * <script>
+                 *     $('#grid').grid({
+                 *         primaryKey: 'ID',
+                 *         dataSource: '/Players/Get',
+                 *         columns: [ { field: 'Name', sortable: true }, { field: 'PlaceOfBirth' } ],
+                 *         grouping: { groupBy: 'CountryName' },
+                 *         icons: {
+                 *             expandGroup: '<i class="material-icons">keyboard_arrow_right</i>',
+                 *             collapseGroup: '<i class="material-icons">keyboard_arrow_down</i>'
+                 *         }
+                 *     });
+                 * </script>
+                 */
+                collapseGroup: '<i class="gj-icon minus" />'
             }
         },
 

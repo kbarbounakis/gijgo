@@ -6,20 +6,92 @@
  * Released under the MIT license
  */
 /* global window alert jQuery */
-/**  */gj.draggable = {
+/** 
+ * @widget Draggable 
+ * @plugin Base
+ */
+gj.draggable = {
     plugins: {}
 };
 
 gj.draggable.config = {
     base: {
         /** If specified, restricts dragging from starting unless the mousedown occurs on the specified element.
-         * Only elements that descend from the draggable element are permitted.         */        handle: undefined,
+         * Only elements that descend from the draggable element are permitted.
+         * @type jquery element
+         * @default undefined
+         * @example sample <!-- nojquery, draggable -->
+         * <style>
+         * .element { border: 1px solid #999; width: 300px; height: 200px; }
+         * .handle { background-color: #DDD; cursor: move; width: 200px; margin: 5px auto 0px auto; text-align: center; padding: 5px; }
+         * </style>
+         * <div id="element" class="element">
+         *   <div id="handle" class="handle">Handle for dragging</div>
+         * </div>
+         * <script>
+         *     new GijgoDraggable(document.getElementById('element'), {
+         *         handle: document.getElementById('handle')
+         *     });
+         * </script>
+         */
+        handle: undefined,
 
-        /** If set to false, restricts dragging on vertical direction.         */        vertical: true,
+        /** If set to false, restricts dragging on vertical direction.
+         * @type Boolean
+         * @default true
+         * @example sample <!-- nojquery, draggable -->
+         * <style>
+         * .element { border: 1px solid #999; width: 300px; height: 200px; cursor: move; text-align: center; background-color: #DDD; }
+         * </style>
+         * <div id="element" class="element">
+         *     drag me<br/>
+         *     <i>(dragging on vertical direction is disabled)</i>
+         * </div>
+         * <script>
+         *     new GijgoDraggable(document.getElementById('element'), {
+         *         vertical: false
+         *     });
+         * </script>
+         */
+        vertical: true,
 
-        /** If set to false, restricts dragging on horizontal direction.         */        horizontal: true,
+        /** If set to false, restricts dragging on horizontal direction.
+         * @type Boolean
+         * @default true
+         * @example sample <!-- nojquery, draggable -->
+         * <style>
+         * .element { border: 1px solid #999; width: 300px; height: 200px; cursor: move; text-align: center; background-color: #DDD; }
+         * </style>
+         * <div id="element" class="element">
+         *     drag me<br/>
+         *     <i>(dragging on horizontal direction is disabled)</i>
+         * </div>
+         * <script>
+         *     new GijgoDraggable(document.getElementById('element'), {
+         *         horizontal: false
+         *     });
+         * </script>
+         */
+        horizontal: true,
 
-        /** Constrains dragging to within the bounds of the specified element.         */        containment: undefined
+        /** Constrains dragging to within the bounds of the specified element.
+         * @type Element
+         * @default undefined
+         * @example sample <!-- nojquery, draggable -->
+         * <style>
+         * .container { border: 1px solid #999; width: 600px; height: 600px; }
+         * .element { border: 1px solid #999; width: 300px; height: 200px; cursor: move; text-align: center; background-color: #DDD; }
+         * </style>
+         * <div id="container" class="container">
+         *     <div id="element" class="element">drag me</div>
+         * </div>
+         * <script>
+         *     new GijgoDraggable(document.getElementById('element'), {
+         *         containment: document.getElementById('container')
+         *     });
+         * </script>
+         */
+        containment: undefined
     }
 };
 
@@ -161,7 +233,24 @@ gj.draggable.methods = {
 gj.draggable.events = {
     /**
      * Triggered while the mouse is moved during the dragging, immediately before the current move happens.
-     *     */    drag: function (el, newLeft, newTop, mouseX, mouseY) {
+     *
+     * @event drag
+     * @param {object} e - event data
+     * @param {object} newPosition - New position of the draggable element as { top, left } object.
+     * @param {object} mousePosition - Current mouse position as { x, y } object.
+     * @example sample <!-- draggable -->
+     * <style>
+     * .element { border: 1px solid #999; width: 300px; height: 200px; cursor: move; text-align: center; background-color: #DDD; }
+     * </style>
+     * <div id="element" class="element gj-unselectable">drag me</div>
+     * <script>
+     *     var obj = new GijgoDraggable(document.getElementById('element'));
+     *     obj.element.addEventListener('drag', function (e) {
+     *         $('body').append('<div>The drag event is fired. New Element Position = { top:' + e.newPosition.top + ', left: ' + e.newPosition.left + '}.</div>');
+     *     });
+     * </script>
+     */
+    drag: function (el, newLeft, newTop, mouseX, mouseY) {
         var event = new Event('drag');
         event.newPosition = { left: newLeft, top: newTop };
         event.mousePosition = { x: mouseX, y: mouseY };
@@ -170,13 +259,50 @@ gj.draggable.events = {
 
     /**
      * Triggered when dragging starts.
-     *     */    start: function (el, mouseX, mouseY) {
+     *
+     * @event start
+     * @param {object} e - event data
+     * @param {object} mousePosition - Current mouse position as { x, y } object.
+     * @example sample <!-- draggable -->
+     * <style>
+     * .element { border: 1px solid #999; width: 300px; height: 200px; cursor: move; text-align: center; background-color: #DDD; }
+     * </style>
+     * <div id="element" class="element gj-unselectable">
+     *   drag me
+     * </div>
+     * <script>
+     *     new GijgoDraggable(document.getElementById('element'), {
+     *         start: function (e, mousePosition) {
+     *             $('body').append('<div>The start event is fired. mousePosition { x:' + mousePosition.x + ', y: ' + mousePosition.y + '}.</div>');
+     *         }
+     *     });
+     * </script>
+     */
+    start: function (el, mouseX, mouseY) {
         return el.dispatchEvent(new CustomEvent('start', { x: mouseX, y: mouseY }));
     },
 
     /**
      * Triggered when dragging stops.
-     *     */    stop: function (el, mousePosition) {
+     *
+     * @event stop
+     * @param {object} e - event data
+     * @param {object} mousePosition - Current mouse position as { x, y } object.
+     * @example sample <!-- draggable -->
+     * <style>
+     * .element { border: 1px solid #999; width: 300px; height: 200px; cursor: move; text-align: center; background-color: #DDD; }
+     * </style>
+     * <div id="element" class="element gj-unselectable">
+     *   drag me
+     * </div>
+     * <script>
+     *     var obj = new GijgoDraggable(document.getElementById('element'));
+     *     obj.addEventListener('stop', function (e) {
+     *         $('body').append('<div>The stop event is fired.</div>');
+     *     });
+     * </script>
+     */
+    stop: function (el, mousePosition) {
         return el.dispatchEvent(new CustomEvent('stop', mousePosition));
     }
 };
@@ -187,7 +313,20 @@ GijgoDraggable = function (element, jsConfig) {
 
     self.element = element;
     
-    /** Remove draggable functionality from the element.        */    self.destroy = function () {
+    /** Remove draggable functionality from the element.
+        * @method
+        * @return jquery element
+        * @example sample <!-- draggable -->
+        * <style>
+        * .element { border: 1px solid #999; width: 300px; height: 200px; cursor: move; text-align: center; background-color: #DDD; }
+        * </style>
+        * <button onclick="dragEl.destroy()" class="gj-button-md">Destroy</button>
+        * <div id="element" class="element">Drag Me</div>
+        * <script>
+        *     var dragEl = $('#element').draggable();
+        * </script>
+        */
+    self.destroy = function () {
         return methods.destroy(this);
     };
 
