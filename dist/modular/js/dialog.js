@@ -6,7 +6,7 @@
  * Released under the MIT license
  */
 /* global window alert jQuery */
-/**  */gj.dialog = {
+/**  */gj.dialog = {
     plugins: {},
     messages: {}
 };
@@ -14,38 +14,38 @@
 gj.dialog.config = {
     base: {
         /** If set to true, the dialog will automatically open upon initialization.
-         * If false, the dialog will stay hidden until the open() method is called.         */        autoOpen: true,
+         * If false, the dialog will stay hidden until the open() method is called.         */        autoOpen: true,
 
-        /** Specifies whether the dialog should have a close button in right part of dialog header.         */        closeButtonInHeader: true,
+        /** Specifies whether the dialog should have a close button in right part of dialog header.         */        closeButtonInHeader: true,
 
-        /** Specifies whether the dialog should close when it has focus and the user presses the escape (ESC) key.         */        closeOnEscape: true,
+        /** Specifies whether the dialog should close when it has focus and the user presses the escape (ESC) key.         */        closeOnEscape: true,
 
-        /** If set to true, the dialog will be draggable by the title bar.         */        draggable: true,
+        /** If set to true, the dialog will be draggable by the title bar.         */        draggable: true,
 
-        /** The height of the dialog.         */        height: 'auto',
+        /** The height of the dialog.         */        height: 'auto',
 
-        /** The language that needs to be in use.         */        locale: 'en-us',
+        /** The language that needs to be in use.         */        locale: 'en-us',
 
-        /** The maximum height in pixels to which the dialog can be resized.         */        maxHeight: undefined,
+        /** The maximum height in pixels to which the dialog can be resized.         */        maxHeight: undefined,
 
-        /** The maximum width in pixels to which the dialog can be resized.         */        maxWidth: undefined,
+        /** The maximum width in pixels to which the dialog can be resized.         */        maxWidth: undefined,
 
-        /** The minimum height in pixels to which the dialog can be resized.         */        minHeight: undefined,
+        /** The minimum height in pixels to which the dialog can be resized.         */        minHeight: undefined,
 
-        /** The minimum width in pixels to which the dialog can be resized.         */        minWidth: undefined,
+        /** The minimum width in pixels to which the dialog can be resized.         */        minWidth: undefined,
 
         /** If set to true, the dialog will have modal behavior.
-         * Modal dialogs create an overlay below the dialog, but above other page elements and you can't interact with them.         */        modal: false,
+         * Modal dialogs create an overlay below the dialog, but above other page elements and you can't interact with them.         */        modal: false,
 
-        /** If set to true, the dialog will be resizable.         */        resizable: false,
+        /** If set to true, the dialog will be resizable.         */        resizable: false,
 
-        /** If set to true, add vertical scroller to the dialog body.         */        scrollable: false,
+        /** If set to true, add vertical scroller to the dialog body.         */        scrollable: false,
 
-        /** The title of the dialog. Can be also set through the title attribute of the html element.         */        title: undefined,
+        /** The title of the dialog. Can be also set through the title attribute of the html element.         */        title: undefined,
 
-        /** The name of the UI library that is going to be in use. Currently we support Material Design and Bootstrap.         */        uiLibrary: undefined,
+        /** The name of the UI library that is going to be in use. Currently we support Material Design and Bootstrap.         */        uiLibrary: undefined,
 
-        /** The width of the dialog.         */        width: 300,
+        /** The width of the dialog.         */        width: 300,
 
         style: {
             modal: 'gj-modal',
@@ -82,60 +82,60 @@ gj.dialog.config = {
         }
     }
 };
-/**   */gj.dialog.events = {
+/**   */gj.dialog.events = {
     /**
      * Triggered when the dialog is initialized.
-     *     */    initialized: function ($dialog) {
+     *     */    initialized: function ($dialog) {
         $dialog.trigger("initialized");
     },
 
     /**
-     * Triggered before the dialog is opened.     */    opening: function ($dialog) {
+     * Triggered before the dialog is opened.     */    opening: function ($dialog) {
         $dialog.trigger("opening");
     },
 
     /**
-     * Triggered when the dialog is opened.     */    opened: function ($dialog) {
+     * Triggered when the dialog is opened.     */    opened: function ($dialog) {
         $dialog.trigger("opened");
     },
 
     /**
-     * Triggered before the dialog is closed.     */    closing: function ($dialog) {
+     * Triggered before the dialog is closed.     */    closing: function ($dialog) {
         $dialog.trigger("closing");
     },
 
     /**
-     * Triggered when the dialog is closed.     */    closed: function ($dialog) {
+     * Triggered when the dialog is closed.     */    closed: function ($dialog) {
         $dialog.trigger("closed");
     },
 
     /**
-     * Triggered while the dialog is being dragged.     */    drag: function ($dialog) {
+     * Triggered while the dialog is being dragged.     */    drag: function ($dialog) {
         $dialog.trigger("drag");
     },
 
     /**
-     * Triggered when the user starts dragging the dialog.     */    dragStart: function ($dialog) {
+     * Triggered when the user starts dragging the dialog.     */    dragStart: function ($dialog) {
         $dialog.trigger("dragStart");
     },
 
     /**
-     * Triggered after the dialog has been dragged.     */    dragStop: function ($dialog) {
+     * Triggered after the dialog has been dragged.     */    dragStop: function ($dialog) {
         $dialog.trigger("dragStop");
     },
 
     /**
-     * Triggered while the dialog is being resized.     */    resize: function ($dialog) {
+     * Triggered while the dialog is being resized.     */    resize: function ($dialog) {
         $dialog.trigger("resize");
     },
 
     /**
-     * Triggered when the user starts resizing the dialog.     */    resizeStart: function ($dialog) {
+     * Triggered when the user starts resizing the dialog.     */    resizeStart: function ($dialog) {
         $dialog.trigger("resizeStart");
     },
 
     /**
-     * Triggered after the dialog has been resized.     */    resizeStop: function ($dialog) {
+     * Triggered after the dialog has been resized.     */    resizeStop: function ($dialog) {
         $dialog.trigger("resizeStop");
     }
 };
@@ -434,34 +434,34 @@ gj.dialog.methods = {
         return $dialog;
     }
 };
-/**   */GijgoDialog = function (element, jsConfig) {
+/**   */GijgoDialog = function (element, jsConfig) {
     var self = this,
         methods = gj.datepicker.methods;
 
     self.element = element;
 
     /**
-     * Opens the dialog.     */    self.open = function (title) {
+     * Opens the dialog.     */    self.open = function (title) {
         return methods.open(this, title);
     };
 
     /**
-     * Close the dialog.     */    self.close = function () {
+     * Close the dialog.     */    self.close = function () {
         return methods.close(this);
     };
 
     /**
-     * Check if the dialog is currently open.     */    self.isOpen = function () {
+     * Check if the dialog is currently open.     */    self.isOpen = function () {
         return methods.isOpen(this);
     };
 
     /**
-     * Gets or set the content of a dialog. Supports chaining when used as a setter.     */    self.content = function (content) {
+     * Gets or set the content of a dialog. Supports chaining when used as a setter.     */    self.content = function (content) {
         return methods.content(this, content);
     };
 
     /**
-     * Destroy the dialog.     */    self.destroy = function (keepHtml) {
+     * Destroy the dialog.     */    self.destroy = function (keepHtml) {
         return methods.destroy(this, keepHtml);
     };
 

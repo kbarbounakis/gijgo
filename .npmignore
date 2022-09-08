@@ -1,2 +1,19 @@
+# git
 .git
+.gitattributes
+
+# bower
+bower.json
+
+# build
+Gruntfile.json
+
+# dev
+BACKERS.md
+Gijgo.GitHub.csproj
+index.html
+JSLintNet.json
+examples
+app.js
+
 

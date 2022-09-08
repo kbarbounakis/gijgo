@@ -6,35 +6,35 @@
  * Released under the MIT license
  */
 /* global window alert jQuery gj */
-/**  */gj.dropdown = {
+/**  */gj.dropdown = {
     plugins: {}
 };
 
 gj.dropdown.config = {
     base: {
 
-        /** The data source of dropdown.         */        dataSource: undefined,
+        /** The data source of dropdown.         */        dataSource: undefined,
 
-        /** Text field name.         */        textField: 'text',
+        /** Text field name.         */        textField: 'text',
 
-        /** Value field name.         */        valueField: 'value',
+        /** Value field name.         */        valueField: 'value',
 
-        /** Selected field name.         */        selectedField: 'selected',
+        /** Selected field name.         */        selectedField: 'selected',
 
-        /** The width of the dropdown.         */        width: undefined,
+        /** The width of the dropdown.         */        width: undefined,
 
-        /** The maximum height of the dropdown list. When set to auto adjust to the screen height.         */        maxHeight: 'auto',
+        /** The maximum height of the dropdown list. When set to auto adjust to the screen height.         */        maxHeight: 'auto',
 
-        /** Placeholder. This label appear only if the value is not set yet.         */        placeholder: undefined,
+        /** Placeholder. This label appear only if the value is not set yet.         */        placeholder: undefined,
 
         fontSize: undefined,
 
-        /** The name of the UI library that is going to be in use.         */        uiLibrary: 'materialdesign',
+        /** The name of the UI library that is going to be in use.         */        uiLibrary: 'materialdesign',
 
-        /** The name of the icons library that is going to be in use. Currently we support Material Icons, Font Awesome and Glyphicons.         */        iconsLibrary: 'materialicons',
+        /** The name of the icons library that is going to be in use. Currently we support Material Icons, Font Awesome and Glyphicons.         */        iconsLibrary: 'materialicons',
 
         icons: {
-            /** DropDown icon definition.             */            dropdown: '<i class="gj-icon arrow-dropdown" />',
+            /** DropDown icon definition.             */            dropdown: '<i class="gj-icon arrow-dropdown" />',
 
             dropup: '<i class="gj-icon arrow-dropup" />'
         },
@@ -394,12 +394,12 @@ gj.dropdown.methods = {
 gj.dropdown.events = {
     /**
      * Triggered when the dropdown value is changed.
-     *     */    change: function ($dropdown) {
+     *     */    change: function ($dropdown) {
         return $dropdown.triggerHandler('change');
     },
 
     /**
-     * Event fires after the loading of the data in the dropdown.     */    dataBound: function ($dropdown) {
+     * Event fires after the loading of the data in the dropdown.     */    dataBound: function ($dropdown) {
         return $dropdown.triggerHandler('dataBound');
     }
 };
@@ -410,7 +410,7 @@ GijgoDropDown = function (element, jsConfig) {
 
     self.element = element;
 
-    /** Gets or sets the value of the DropDown.     */    self.value = function (value) {
+    /** Gets or sets the value of the DropDown.     */    self.value = function (value) {
         return methods.value(this, value);
     };
 
@@ -422,7 +422,7 @@ GijgoDropDown = function (element, jsConfig) {
         return methods.disable(this);
     };
 
-    /** Remove dropdown functionality from the element.     */    self.destroy = function () {
+    /** Remove dropdown functionality from the element.     */    self.destroy = function () {
         return methods.destroy(this);
     };
 

@@ -6,7 +6,7 @@
  * Released under the MIT license
  */
 /* global window alert jQuery gj */
-/**  */gj.colorpicker = {
+/**  */gj.colorpicker = {
     plugins: {},
     messages: {
         'en-us': {
@@ -17,9 +17,9 @@
 gj.colorpicker.config = {
     base: {
 
-        /** The name of the UI library that is going to be in use.         */        uiLibrary: 'materialdesign',
+        /** The name of the UI library that is going to be in use.         */        uiLibrary: 'materialdesign',
 
-        /** The initial colorpicker value.         */        value: undefined,
+        /** The initial colorpicker value.         */        value: undefined,
 
         icons: {
             rightIcon: '<i class="gj-icon">event</i>'
@@ -79,22 +79,22 @@ gj.colorpicker.methods = {
 gj.colorpicker.events = {
     /**
      * Fires when the colorpicker value changes as a result of selecting a new value with the drag handle, buttons or keyboard.
-     *     */    change: function ($colorpicker) {
+     *     */    change: function ($colorpicker) {
         return $colorpicker.triggerHandler('change');
     },
 
     /**
-     * Fires as a new color is displayed in the drop-down picker.     */    select: function ($colorpicker) {
+     * Fires as a new color is displayed in the drop-down picker.     */    select: function ($colorpicker) {
         return $colorpicker.triggerHandler('select');
     },
 
     /**
-     * Fires when the picker popup is opening.     */    open: function ($colorpicker) {
+     * Fires when the picker popup is opening.     */    open: function ($colorpicker) {
         return $colorpicker.triggerHandler('open');
     },
 
     /**
-     * Fires when the picker popup is closing.     */    close: function ($colorpicker) {
+     * Fires when the picker popup is closing.     */    close: function ($colorpicker) {
         return $colorpicker.triggerHandler('close');
     }
 };
@@ -105,19 +105,19 @@ GijgoColorPicker = function (element, jsConfig) {
 
     self.element = element;
 
-    /** Gets or sets the value of the colorpicker.     */    self.value = function (value) {
+    /** Gets or sets the value of the colorpicker.     */    self.value = function (value) {
         return methods.value(this, value);
     };
 
-    /** Remove colorpicker functionality from the element.     */    self.destroy = function () {
+    /** Remove colorpicker functionality from the element.     */    self.destroy = function () {
         return gj.picker.widget.prototype.destroy.call(this, 'colorpicker');
     };
 
-    /** Opens the popup element with the color selector.     */    self.open = function () {
+    /** Opens the popup element with the color selector.     */    self.open = function () {
         return methods.open(this);
     };
 
-    /** Close the popup element with the color selector.     */    self.close = function () {
+    /** Close the popup element with the color selector.     */    self.close = function () {
         return gj.picker.widget.prototype.close.call(this, 'colorpicker');
     };
     

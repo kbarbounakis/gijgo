@@ -6,7 +6,7 @@
  * Released under the MIT license
  */
 /* global window alert jQuery gj */
-/**  */gj.tree = {
+/**  */gj.tree = {
     plugins: {}
 };
 
@@ -15,38 +15,38 @@ gj.tree.config = {
 
         params: {},
 
-        /** When this setting is enabled the content of the tree will be loaded automatically after the creation of the tree.         */        autoLoad: true,
+        /** When this setting is enabled the content of the tree will be loaded automatically after the creation of the tree.         */        autoLoad: true,
 
         /** The type of the node selection.<br/>
-         * If the type is set to multiple the user will be able to select more then one node in the tree.         */        selectionType: 'single',
+         * If the type is set to multiple the user will be able to select more then one node in the tree.         */        selectionType: 'single',
 
-        /** This setting enable cascade selection and unselection of children         */        cascadeSelection: false,
+        /** This setting enable cascade selection and unselection of children         */        cascadeSelection: false,
 
-        /** The data source of tree.         */        dataSource: undefined,
+        /** The data source of tree.         */        dataSource: undefined,
 
-        /** Primary key field name.         */        primaryKey: undefined,
+        /** Primary key field name.         */        primaryKey: undefined,
 
-        /** Text field name.         */        textField: 'text',
+        /** Text field name.         */        textField: 'text',
 
-        /** Children field name.         */        childrenField: 'children',
+        /** Children field name.         */        childrenField: 'children',
 
-        /** The name of the field that indicates if the node has children. Shows expand icon if the node has children.         */        hasChildrenField: 'hasChildren',
+        /** The name of the field that indicates if the node has children. Shows expand icon if the node has children.         */        hasChildrenField: 'hasChildren',
 
-        /** Image css class field name.         */        imageCssClassField: 'imageCssClass',
+        /** Image css class field name.         */        imageCssClassField: 'imageCssClass',
 
-        /** Image url field name.         */        imageUrlField: 'imageUrl',
+        /** Image url field name.         */        imageUrlField: 'imageUrl',
 
-        /** Image html field name.         */        imageHtmlField: 'imageHtml',
+        /** Image html field name.         */        imageHtmlField: 'imageHtml',
 
-        /** Disabled field name. Assume that the item is not disabled if not set.         */        disabledField: 'disabled',
+        /** Disabled field name. Assume that the item is not disabled if not set.         */        disabledField: 'disabled',
 
-        /** Width of the tree.         */        width: undefined,
+        /** Width of the tree.         */        width: undefined,
 
-        /** When this setting is enabled the content of the tree will be wrapped by borders.         */        border: false,
+        /** When this setting is enabled the content of the tree will be wrapped by borders.         */        border: false,
 
-        /** The name of the UI library that is going to be in use.         */        uiLibrary: 'materialdesign',
+        /** The name of the UI library that is going to be in use.         */        uiLibrary: 'materialdesign',
 
-        /** The name of the icons library that is going to be in use. Currently we support Material Icons, Font Awesome and Glyphicons.         */        iconsLibrary: 'materialicons',
+        /** The name of the icons library that is going to be in use. Currently we support Material Icons, Font Awesome and Glyphicons.         */        iconsLibrary: 'materialicons',
 
         autoGenId: 1,
 
@@ -64,9 +64,9 @@ gj.tree.config = {
         },
 
         icons: {
-            /** Expand icon definition.             */            expand: '<i class="gj-icon chevron-right" />',
+            /** Expand icon definition.             */            expand: '<i class="gj-icon chevron-right" />',
 
-            /** Collapse icon definition.             */            collapse: '<i class="gj-icon chevron-down" />'
+            /** Collapse icon definition.             */            collapse: '<i class="gj-icon chevron-down" />'
         }
     },
 
@@ -121,60 +121,60 @@ gj.tree.config = {
         }
     }
 };
-/**  */gj.tree.events = {
+/**  */gj.tree.events = {
 
     /**
-     * Event fires when the tree is initialized     */    initialized: function ($tree) {
+     * Event fires when the tree is initialized     */    initialized: function ($tree) {
         $tree.triggerHandler('initialized');
     },
 
     /**
-     * Event fired before data binding takes place.     */    dataBinding: function ($tree) {
+     * Event fired before data binding takes place.     */    dataBinding: function ($tree) {
         $tree.triggerHandler('dataBinding');
     },
 
     /**
-     * Event fires after the loading of the data in the tree.     */    dataBound: function ($tree) {
+     * Event fires after the loading of the data in the tree.     */    dataBound: function ($tree) {
         $tree.triggerHandler('dataBound');
     },
 
     /**
-     * Event fires after selection of tree node.     */    select: function ($tree, $node, id) {
+     * Event fires after selection of tree node.     */    select: function ($tree, $node, id) {
         return $tree.triggerHandler('select', [$node, id]);
     },
 
     /**
-     * Event fires on un selection of tree node     */    unselect: function ($tree, $node, id) {
+     * Event fires on un selection of tree node     */    unselect: function ($tree, $node, id) {
         return $tree.triggerHandler('unselect', [$node, id]);
     },
 
     /**
-     * Event fires before node expand.     */    expand: function ($tree, $node, id) {
+     * Event fires before node expand.     */    expand: function ($tree, $node, id) {
         return $tree.triggerHandler('expand', [$node, id]);
     },
 
     /**
-     * Event fires before node collapse.     */    collapse: function ($tree, $node, id) {
+     * Event fires before node collapse.     */    collapse: function ($tree, $node, id) {
         return $tree.triggerHandler('collapse', [$node, id]);
     },
 
     /**
-     * Event fires on enable of tree node.     */    enable: function ($tree, $node) {
+     * Event fires on enable of tree node.     */    enable: function ($tree, $node) {
         return $tree.triggerHandler('enable', [$node]);
     },
 
     /**
-     * Event fires on disable of tree node.     */    disable: function ($tree, $node) {
+     * Event fires on disable of tree node.     */    disable: function ($tree, $node) {
         return $tree.triggerHandler('disable', [$node]);
     },
 
     /**
-     * Event fires before tree destroy     */    destroying: function ($tree) {
+     * Event fires before tree destroy     */    destroying: function ($tree) {
         return $tree.triggerHandler('destroying');
     },
 
     /**
-     * Event fires when the data is bound to node.     */    nodeDataBound: function ($tree, $node, id, record) {
+     * Event fires when the data is bound to node.     */    nodeDataBound: function ($tree, $node, id, record) {
         return $tree.triggerHandler('nodeDataBound', [$node, id, record]);
     }
 }
@@ -700,141 +700,141 @@ gj.tree.methods = {
         return result;
     }
 }
-/**  */GijgoTree = function (element, jsConfig) {
+/**  */GijgoTree = function (element, jsConfig) {
     var self = this,
         methods = gj.datepicker.methods;
 
     self.element = element;
 
     /**
-     * Reload the tree.     */    self.reload = function (params) {
+     * Reload the tree.     */    self.reload = function (params) {
         return gj.widget.prototype.reload.call(this, params);
     };
 
     /**
-     * Render data in the tree     */    self.render = function (response) {
+     * Render data in the tree     */    self.render = function (response) {
         return methods.render(this, response);
     };
 
     /**
-     * Add node to the tree.     */    self.addNode = function (data, $parentNode, position) {
+     * Add node to the tree.     */    self.addNode = function (data, $parentNode, position) {
         return methods.addNode(this, data, $parentNode, position);
     };
 
     /**
-     * Remove node from the tree.     */    self.removeNode = function ($node) {
+     * Remove node from the tree.     */    self.removeNode = function ($node) {
         return methods.remove(this, $node);
     };
 
     /**
-     * Update node from the tree.     */    self.updateNode = function (id, record) {
+     * Update node from the tree.     */    self.updateNode = function (id, record) {
         return methods.update(this, id, record);
     };
 
     /**
-     * Destroy the tree.     */    self.destroy = function () {
+     * Destroy the tree.     */    self.destroy = function () {
         return methods.destroy(this);
     };
 
     /**
-     * Expand node from the tree.     */    self.expand = function ($node, cascade) {
+     * Expand node from the tree.     */    self.expand = function ($node, cascade) {
         return methods.expand(this, $node, cascade);
     };
 
     /**
-     * Collapse node from the tree.     */    self.collapse = function ($node, cascade) {
+     * Collapse node from the tree.     */    self.collapse = function ($node, cascade) {
         return methods.collapse(this, $node, cascade);
     };
 
     /**
-     * Expand all tree nodes     */    self.expandAll = function () {
+     * Expand all tree nodes     */    self.expandAll = function () {
         return methods.expandAll(this);
     };
 
     /**
-     * Collapse all tree nodes     */    self.collapseAll = function () {
+     * Collapse all tree nodes     */    self.collapseAll = function () {
         return methods.collapseAll(this);
     };
 
     /**
-     * Return node data by id of the record.     */    self.getDataById = function (id) {
+     * Return node data by id of the record.     */    self.getDataById = function (id) {
         return methods.getDataById(this, id, this.data('records'));
     };
 
     /**
-     * Return node data by text.     */    self.getDataByText = function (text) {
+     * Return node data by text.     */    self.getDataByText = function (text) {
         return methods.getDataByText(this, text, this.data('records'));
     };
 
     /**
-     * Return node by id of the record.     */    self.getNodeById = function (id) {
+     * Return node by id of the record.     */    self.getNodeById = function (id) {
         return methods.getNodeById(this.children('ul'), id);
     };
 
     /**
-     * Return node by text.     */    self.getNodeByText = function (text) {
+     * Return node by text.     */    self.getNodeByText = function (text) {
         return methods.getNodeByText(this.children('ul'), text);
     };
 
     /**
-     * Return an array with all records presented in the tree.     */    self.getAll = function () {
+     * Return an array with all records presented in the tree.     */    self.getAll = function () {
         return this.data('records');
     };
 
     /**
-     * Select node from the tree.     */    self.select = function ($node) {
+     * Select node from the tree.     */    self.select = function ($node) {
         return methods.select(this, $node);
     };
 
     /**
-     * Unselect node from the tree.     */    self.unselect = function ($node) {
+     * Unselect node from the tree.     */    self.unselect = function ($node) {
         return methods.unselect(this, $node);
     };
 
     /**
-     * Select all tree nodes     */    self.selectAll = function () {
+     * Select all tree nodes     */    self.selectAll = function () {
         return methods.selectAll(this);
     };
 
     /**
-     * Unselect all tree nodes     */    self.unselectAll = function () {
+     * Unselect all tree nodes     */    self.unselectAll = function () {
         return methods.unselectAll(this);
     };
 
     /**
-     * Return an array with the ids of the selected nodes.     */    self.getSelections = function () {
+     * Return an array with the ids of the selected nodes.     */    self.getSelections = function () {
         return methods.getSelections(this.children('ul'));
     };
 
     /**
-     * Return an array with the ids of all children.     */    self.getChildren = function ($node, cascade) {
+     * Return an array with the ids of all children.     */    self.getChildren = function ($node, cascade) {
         return methods.getChildren(this, $node, cascade);
     };
 
     /**
-     * Return an array with the names of all parents.     */    self.parents = function (id) {
+     * Return an array with the names of all parents.     */    self.parents = function (id) {
         var parents = [], data = this.data();
         methods.pathFinder(data, data.records, id, parents);
         return parents.reverse();
     };
 
     /**
-     * Enable node from the tree.     */    self.enable = function ($node, cascade) {
+     * Enable node from the tree.     */    self.enable = function ($node, cascade) {
         return methods.enableNode(this, $node, cascade);
     };
 
     /**
-     * Enable all nodes from the tree.     */    self.enableAll = function () {
+     * Enable all nodes from the tree.     */    self.enableAll = function () {
         return methods.enableAll(this);
     };
 
     /**
-     * Disable node from the tree.     */    self.disable = function ($node, cascade) {
+     * Disable node from the tree.     */    self.disable = function ($node, cascade) {
         return methods.disableNode(this, $node, cascade);
     };
 
     /**
-     * Disable all nodes from the tree.     */    self.disableAll = function () {
+     * Disable all nodes from the tree.     */    self.disableAll = function () {
         return methods.disableAll(this);
     };
 
@@ -867,14 +867,14 @@ if (typeof (jQuery) !== "undefined") {
         };
     })(jQuery);
 }
-/**  */gj.tree.plugins.checkboxes = {
+/**  */gj.tree.plugins.checkboxes = {
     config: {
         base: {
-            /** Add checkbox for each node, if set to true.              */            checkboxes: undefined,
+            /** Add checkbox for each node, if set to true.              */            checkboxes: undefined,
 
-            /** Name of the source field, that indicates if the checkbox is checked.             */            checkedField: 'checked',
+            /** Name of the source field, that indicates if the checkbox is checked.             */            checkedField: 'checked',
 
-            /** This setting enable cascade check and uncheck of children             */            cascadeCheck: true,
+            /** This setting enable cascade check and uncheck of children             */            cascadeCheck: true,
         }
     },
 
@@ -977,7 +977,7 @@ if (typeof (jQuery) !== "undefined") {
 
     public: {
 
-        /** Get ids of all checked nodes         */        getCheckedNodes: function () {
+        /** Get ids of all checked nodes         */        getCheckedNodes: function () {
             var result = [],
                 checkboxes = this.find('li [data-role="checkbox"] input[type="checkbox"]');
             $.each(checkboxes, function () {
@@ -990,7 +990,7 @@ if (typeof (jQuery) !== "undefined") {
         },
 
         /**
-         * Check all tree nodes         */        checkAll: function () {
+         * Check all tree nodes         */        checkAll: function () {
             var $checkboxes = this.find('li [data-role="checkbox"] input[type="checkbox"]');
             $.each($checkboxes, function () {
                 $(this).checkbox('state', 'checked');
@@ -999,7 +999,7 @@ if (typeof (jQuery) !== "undefined") {
         },
 
         /**
-         * Uncheck all tree nodes         */        uncheckAll: function () {
+         * Uncheck all tree nodes         */        uncheckAll: function () {
             var $checkboxes = this.find('li [data-role="checkbox"] input[type="checkbox"]');
             $.each($checkboxes, function () {
                 $(this).checkbox('state', 'unchecked');
@@ -1008,13 +1008,13 @@ if (typeof (jQuery) !== "undefined") {
         },
 
         /**
-         * Check tree node.         */        check: function ($node) {
+         * Check tree node.         */        check: function ($node) {
             gj.tree.plugins.checkboxes.private.update(this, $node, 'checked');
             return this;
         },
 
         /**
-         * Uncheck tree node.         */        uncheck: function ($node) {
+         * Uncheck tree node.         */        uncheck: function ($node) {
             gj.tree.plugins.checkboxes.private.update(this, $node, 'unchecked');
             return this;
         }
@@ -1022,7 +1022,7 @@ if (typeof (jQuery) !== "undefined") {
 
     events: {
         /**
-         * Event fires when the checkbox state is changed.         */        checkboxChange: function ($tree, $node, record, state) {
+         * Event fires when the checkbox state is changed.         */        checkboxChange: function ($tree, $node, record, state) {
             return $tree.triggerHandler('checkboxChange', [$node, record, state]);
         }
     },
@@ -1046,10 +1046,10 @@ if (typeof (jQuery) !== "undefined") {
     }
 };
 
-/** */gj.tree.plugins.dragAndDrop = {
+/** */gj.tree.plugins.dragAndDrop = {
 	config: {
 		base: {
-			/** Enables drag and drop functionality for each node.              */			dragAndDrop: undefined,
+			/** Enables drag and drop functionality for each node.              */			dragAndDrop: undefined,
 
 			style: {
 			    dragEl: 'gj-tree-drag-el gj-tree-md-drag-el',
@@ -1299,7 +1299,7 @@ if (typeof (jQuery) !== "undefined") {
 
 	events: {
 	    /**
-         * Event fires when the node is dropped.         */	    nodeDrop: function ($tree, id, parentId, orderNumber) {
+         * Event fires when the node is dropped.         */	    nodeDrop: function ($tree, id, parentId, orderNumber) {
 	        return $tree.triggerHandler('nodeDrop', [id, parentId, orderNumber]);
         }
     },
@@ -1314,17 +1314,17 @@ if (typeof (jQuery) !== "undefined") {
 	}
 };
 
-/**  */gj.tree.plugins.lazyLoading = {
+/**  */gj.tree.plugins.lazyLoading = {
     config: {
         base: {
 
             paramNames: {
 
                 /** The name of the parameter that is going to send the parent identificator.
-                 * Lazy Loading needs to be enabled in order this parameter to be in use.                 */                parentId: 'parentId'
+                 * Lazy Loading needs to be enabled in order this parameter to be in use.                 */                parentId: 'parentId'
             },
 
-            /** Enables lazy loading              */            lazyLoading: false
+            /** Enables lazy loading              */            lazyLoading: false
         }
     },
 

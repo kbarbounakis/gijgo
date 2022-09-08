@@ -2,13 +2,14 @@
   "name": "gijgo",
   "version": "2.0.0-alpha-1",
   "description": "Gijgo is a set of free open source javascript controls distributed under MIT License. All widgets are high performance, built on top of the jQuery JavaScript Library and with built-in support for Bootstrap and jQuery UI. They are designed to saves you time and scales with your development process.",
-  "main": "js/gijgo.js",
+  "main": "dist/combined/js/gijgo.js",
   "homepage": "http://gijgo.com/",
   "bugs": {
     "email": "nascovt@gmail.com"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "grunt build"
   },
   "keywords": [
     "jquery-plugin",
@@ -33,6 +34,7 @@
   "author": "Atanas Atanasov",
   "license": "MIT",
   "dependencies": {
+    "grunt-cli": "^1.4.3",
     "jquery": ">=1.9.1"
   },
   "devDependencies": {

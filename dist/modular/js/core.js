@@ -368,7 +368,7 @@ gj.documentManager = {
     }
 };
 
-/**  */gj.core = {
+/**  */gj.core = {
     messages: {
         'en-us': {
             monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
@@ -384,7 +384,7 @@ gj.documentManager = {
         }
     },
 
-    /**      */    parseDate: function (value, format, locale) {
+    /**      */    parseDate: function (value, format, locale) {
         var i, year = 0, month = 0, date = 1, hour = 0, minute = 0, dateParts, formatParts, result;
 
         if (value && typeof value === 'string') {
@@ -431,7 +431,7 @@ gj.documentManager = {
         return result;
     },
 
-    /**      */    formatDate: function (date, format, locale) {
+    /**      */    formatDate: function (date, format, locale) {
         var result = '', separator, tmp,
             formatParts = format.split(/[\s,-\.//\:]+/),
             separators = format.split(/s+|M+|H+|h+|t+|T+|d+|m+|y+/);

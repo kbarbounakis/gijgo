@@ -6,20 +6,20 @@
  * Released under the MIT license
  */
 /* global window alert jQuery */
-/**  */gj.draggable = {
+/**  */gj.draggable = {
     plugins: {}
 };
 
 gj.draggable.config = {
     base: {
         /** If specified, restricts dragging from starting unless the mousedown occurs on the specified element.
-         * Only elements that descend from the draggable element are permitted.         */        handle: undefined,
+         * Only elements that descend from the draggable element are permitted.         */        handle: undefined,
 
-        /** If set to false, restricts dragging on vertical direction.         */        vertical: true,
+        /** If set to false, restricts dragging on vertical direction.         */        vertical: true,
 
-        /** If set to false, restricts dragging on horizontal direction.         */        horizontal: true,
+        /** If set to false, restricts dragging on horizontal direction.         */        horizontal: true,
 
-        /** Constrains dragging to within the bounds of the specified element.         */        containment: undefined
+        /** Constrains dragging to within the bounds of the specified element.         */        containment: undefined
     }
 };
 
@@ -161,7 +161,7 @@ gj.draggable.methods = {
 gj.draggable.events = {
     /**
      * Triggered while the mouse is moved during the dragging, immediately before the current move happens.
-     *     */    drag: function (el, newLeft, newTop, mouseX, mouseY) {
+     *     */    drag: function (el, newLeft, newTop, mouseX, mouseY) {
         var event = new Event('drag');
         event.newPosition = { left: newLeft, top: newTop };
         event.mousePosition = { x: mouseX, y: mouseY };
@@ -170,13 +170,13 @@ gj.draggable.events = {
 
     /**
      * Triggered when dragging starts.
-     *     */    start: function (el, mouseX, mouseY) {
+     *     */    start: function (el, mouseX, mouseY) {
         return el.dispatchEvent(new CustomEvent('start', { x: mouseX, y: mouseY }));
     },
 
     /**
      * Triggered when dragging stops.
-     *     */    stop: function (el, mousePosition) {
+     *     */    stop: function (el, mousePosition) {
         return el.dispatchEvent(new CustomEvent('stop', mousePosition));
     }
 };
@@ -187,7 +187,7 @@ GijgoDraggable = function (element, jsConfig) {
 
     self.element = element;
     
-    /** Remove draggable functionality from the element.        */    self.destroy = function () {
+    /** Remove draggable functionality from the element.        */    self.destroy = function () {
         return methods.destroy(this);
     };
 

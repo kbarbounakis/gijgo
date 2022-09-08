@@ -6,7 +6,7 @@
  * Released under the MIT license
  */
 /* global window alert jQuery */
-/**  */gj.editor = {
+/**  */gj.editor = {
     plugins: {},
     messages: {}
 };
@@ -14,15 +14,15 @@
 gj.editor.config = {
     base: {
 
-        /** The height of the editor. Numeric values are treated as pixels.         */        height: 300,
+        /** The height of the editor. Numeric values are treated as pixels.         */        height: 300,
 
-        /** The width of the editor. Numeric values are treated as pixels.         */        width: undefined,
+        /** The width of the editor. Numeric values are treated as pixels.         */        width: undefined,
 
-        /** The name of the UI library that is going to be in use. Currently we support only Material Design and Bootstrap.          */        uiLibrary: 'materialdesign',
+        /** The name of the UI library that is going to be in use. Currently we support only Material Design and Bootstrap.          */        uiLibrary: 'materialdesign',
 
-        /** The name of the icons library that is going to be in use. Currently we support Material Icons and Font Awesome.         */        iconsLibrary: 'materialicons',
+        /** The name of the icons library that is going to be in use. Currently we support Material Icons and Font Awesome.         */        iconsLibrary: 'materialicons',
 
-        /** The language that needs to be in use.         */        locale: 'en-us',
+        /** The language that needs to be in use.         */        locale: 'en-us',
 
         buttons: undefined,
 
@@ -246,13 +246,13 @@ gj.editor.events = {
 
     /**
      * Event fires before change of text in the editor.
-     *     */    changing: function (el) {
+     *     */    changing: function (el) {
         return el.dispatchEvent(new Event('changing'));
     },
 
     /**
      * Event fires after change of text in the editor.
-     *     */    changed: function (el) {
+     *     */    changed: function (el) {
         return el.dispatchEvent(new Event('changed'));
     }
 };
@@ -263,11 +263,11 @@ GijgoEditor = function (element, jsConfig) {
 
     self.element = element;
 
-    /** Get or set html content in the body.     */    self.content = function (html) {
+    /** Get or set html content in the body.     */    self.content = function (html) {
         return methods.content(this, html);
     };
 
-    /** Remove editor functionality from the element.     */    self.destroy = function () {
+    /** Remove editor functionality from the element.     */    self.destroy = function () {
         return methods.destroy(this);
     };
 

@@ -6,7 +6,7 @@
  * Released under the MIT license
  */
 /* global window alert jQuery gj */
-/**  */gj.slider = {
+/**  */gj.slider = {
     plugins: {},
     messages: {
         'en-us': {
@@ -17,17 +17,17 @@
 gj.slider.config = {
     base: {
 
-        /** The minimum value of the Slider.         */        min: 0,
+        /** The minimum value of the Slider.         */        min: 0,
 
-        /** The maximum value of the Slider.         */        max: 100,
+        /** The maximum value of the Slider.         */        max: 100,
 
-        /** The width of the slider.         */        width: undefined,
+        /** The width of the slider.         */        width: undefined,
 
-        /** The orientation of a Slider: "horizontal" or "vertical".         */        // TODO orientation
+        /** The orientation of a Slider: "horizontal" or "vertical".         */        // TODO orientation
 
-        /** The name of the UI library that is going to be in use.         */        uiLibrary: 'materialdesign',
+        /** The name of the UI library that is going to be in use.         */        uiLibrary: 'materialdesign',
 
-        /** The initial slider value.         */        value: undefined,
+        /** The initial slider value.         */        value: undefined,
 
         icons: {},
 
@@ -211,12 +211,12 @@ gj.slider.methods = {
 gj.slider.events = {
     /**
      * Fires when the slider value changes as a result of selecting a new value with the drag handle, buttons or keyboard.
-     *     */    change: function (el) {
+     *     */    change: function (el) {
         return el.dispatchEvent(new Event('change'));
     },
 
     /**
-     * Fires when the user drags the drag handle to a new position.     */    slide: function (el, value) {
+     * Fires when the user drags the drag handle to a new position.     */    slide: function (el, value) {
         return el.dispatchEvent(new CustomEvent('slide', { 'value': value }));
     }
 };
@@ -227,11 +227,11 @@ GijgoSlider = function (element, jsConfig) {
 
     self.element = element;
 
-    /** Gets or sets the value of the slider.     */    self.value = function (value) {
+    /** Gets or sets the value of the slider.     */    self.value = function (value) {
         return methods.value(this.element, gijgoStorage.get(this.element, 'gijgo'), value);
     };
 
-    /** Remove slider functionality from the element.     */    self.destroy = function () {
+    /** Remove slider functionality from the element.     */    self.destroy = function () {
         return methods.destroy(this.element);
     };
 
